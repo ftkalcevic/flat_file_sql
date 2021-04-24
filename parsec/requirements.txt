@@ -1,0 +1,4 @@
+pip==20.1.1
+ply==3.11
+pycparser==2.20
+setuptools==47.1.0
