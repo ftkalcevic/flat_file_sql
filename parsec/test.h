@@ -3,6 +3,16 @@ typedef enum _enum_data
 	e1 = 1, e2, e3
 } ENUM_DATA;
 
+typedef enum
+{
+	E1,
+	E2 = 3,
+	E4,
+	E5,
+	E6 = E4+ 5,
+	EMAX
+};
+
 typedef struct _my_simple
 {
 	char simp1[(12*2)/2 + 1 - 2];
@@ -25,6 +35,8 @@ typedef int MYINT;
 
 typedef struct _my_struct
 {
+	int enum_sized[EMAX + 1];
+
 	int index;
 	MY_SIMPLE ms;
 	MYINT mi;

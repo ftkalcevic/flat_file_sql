@@ -25,6 +25,7 @@ class CType:
         self.dataSize = 0
         self.name = ""
         self.offset = 0
+        self.parser = parser
 
         if type(node) == c_ast.Typedef:
 
@@ -51,10 +52,10 @@ class CType:
                 raise Exception("Unknown typedef node.type.type - " + str(type(node.type.type)) )
 
         elif type(node) == c_ast.Decl:
-            self.processDecl(parser,node)
+            self.processDecl(node)
 
         elif type(node) == c_ast.TypeDecl:
-            self.processTypeDecl(parser,node)
+            self.processTypeDecl(node)
 
         else:
             raise Exception("Unknown node - " + str(type(node)) )
@@ -92,6 +93,7 @@ class CType:
             assert dim.type == "int"
             return int(dim.value)
         elif type(dim) == c_ast.BinaryOp:
+
             if dim.op == '+':
                 return self.getArraySize(dim.left) + self.getArraySize(dim.right)
             elif dim.op == '-':
@@ -103,7 +105,7 @@ class CType:
             else:
                 raise Exception("Unkown binaryOp type - " + dim.op )
 
-    def processTypeDecl(self,parser,node):
+    def processTypeDecl(self,node):
 
         if self.name == "":
             self.name = node.declname
@@ -124,8 +126,8 @@ class CType:
                 else:
                     raise Exception( "Unknown type - " + str(identifier.names))
 
-            elif len(identifier.names) == 1 and identifier.names[0] in parser.typedefs:
-                self.processTypeDecl( parser, parser.typedefs[identifier.names[0]].type )
+            elif len(identifier.names) == 1 and identifier.names[0] in self.parser.typedefs:
+                self.processTypeDecl( self.parser.typedefs[identifier.names[0]].type )
 
             else:
                 raise Exception("Unknown identifier type - " + str(identifier.names))
@@ -139,8 +141,8 @@ class CType:
             struct = node.type;
 
             if struct.decls == None:
-                if struct.name in parser.structs:
-                    struct = parser.structs[struct.name]
+                if struct.name in self.parser.structs:
+                    struct = self.parser.structs[struct.name]
                 else:
                     raise Exception("Unknown Struct - " + struct.name)
 
@@ -150,7 +152,7 @@ class CType:
 
             self.dataSize = 0
             for decl in struct.decls:
-                t = CType(parser,decl)
+                t = CType(self.parser,decl)
                 self.fields.append( t )
                 self.dataSize += t.getDataSize()
 
@@ -158,7 +160,7 @@ class CType:
             raise Exception("Unknown typedecl subtype - " + str(type(node.type)) )
 
 
-    def processDecl(self,parser,node):
+    def processDecl(self,node):
 
         self.name = node.name
 
@@ -167,28 +169,28 @@ class CType:
             self.bitFieldSize = int(node.bitsize.value)
 
         if type(node.type) == c_ast.TypeDecl:
-            self.processTypeDecl(parser, node.type )
+            self.processTypeDecl(node.type )
 
         elif type(node.type) == c_ast.Struct:
 
             struct = node.type;
 
             if struct.decls == None:
-                if struct.name in parser.structs:
-                    struct = parser.structs[struct.name]
+                if struct.name in self.parser.structs:
+                    struct = self.parser.structs[struct.name]
                 else:
                     raise Exception("Unknown Struct - " + struct.name)
 
             self.dataSize = 0
             for decl in struct.decls:
-                self.fields.append( CType(parser,decl) )
+                self.fields.append( CType(self.parser,decl) )
                 self.dataSize += decl.getDataSize()
 
         elif type(node.type) == c_ast.ArrayDecl:
 
             arr = node.type
-            self.arraySize = self.getArraySize(arr.dim)
-            self.processTypeDecl( parser, arr.type )
+            self.arraySize = self.parser.evaluate(arr.dim)
+            self.processTypeDecl( arr.type )
 
         else:
             raise Exception("Unknown typedecl subtype - " + str(type(node.type)) )
@@ -226,9 +228,44 @@ class StructParser:
         self.unions = {}
         self.structs = {}
         self.enums = {}
+        self.enumValues = {}
         self.fields = []
         return super().__init__(*args, **kwargs)
 
+    def evaluate(self, node):
+        
+        if type(node) == c_ast.Constant:
+            assert node.type == "int"
+            return int(node.value)
+        elif type(node) == c_ast.BinaryOp:
+            if node.op == '+':
+                return self.evaluate(node.left) + self.evaluate(node.right)
+            elif node.op == '-':
+                return self.evaluate(node.left) - self.evaluate(node.right)
+            elif node.op == '*':
+                return int(self.evaluate(node.left) * self.evaluate(node.right))
+            elif node.op == '/':
+                return int(self.evaluate(node.left) / self.evaluate(node.right))
+            else:
+                raise Exception("Unkown binaryOp type - " + node.op )
+        elif type(node) == c_ast.ID:
+            name = node.name;
+            return self.enumValues[name]
+        else:
+            raise Exception("evaluate unknown node type - " + node )
+
+    def addEnumValues(self,node):
+        value = 0
+        for e in node.values.enumerators:
+            name = e.name
+
+            if e.value != None:
+                value = self.evaluate(e.value);
+
+            self.enumValues[name] = value
+            print( e.name, value )
+            value += 1;
+        pass
 
     def extract_types( self, node ):
 
@@ -243,7 +280,9 @@ class StructParser:
         elif type(node) == c_ast.Union:
             self.unions[node.name] = node
         elif type(node) == c_ast.Enum:
-            self.enum[node.name] = node
+            self.addEnumValues(node);
+            if ( node.name != None ):
+                self.enum[node.name] = node
         else:
             for i,c in node.children():
                 self.extract_types(c)
@@ -263,7 +302,7 @@ class StructParser:
         if (not isinstance(node, c_ast.FileAST) or not isinstance(node.ext[-1], c_ast.Decl)):
             raise Exception("Not a valid declaration")
 
-        #node.show(attrnames=True,showcoord=True)
+        node.show()
         self.extract_types( node )    
 
     def MakeType(self, typename):
