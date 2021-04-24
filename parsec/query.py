@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
 r''' 
 
-* - gets every column, [colname, offset],  
+* - gets every column, [colname, offset], 
         arrays (non-char) will be field[0], field[1], field[2], etc
                 structs will be field[0].s1, field[0].s2, etc
 struct_name.*
