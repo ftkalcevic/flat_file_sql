@@ -84,12 +84,12 @@ def readData(structName, t):
     file = tables[structName]
 
     recordSize = t.getDataSize()
-    fileSize = Path(file).stat().st_size
+    fileSize = Path(file["dataFile"]).stat().st_size
 
     if int(fileSize/recordSize)*recordSize != fileSize:
         raise Exception("File is not a multiple of recordsize")
 
-    with open( file, "rb" ) as f:
+    with open( file["dataFile"], "rb" ) as f:
         while True:
             buf = f.read(recordSize)
             break

@@ -5,7 +5,7 @@
 
 #define PRINT(struct)		printf("sizeof(" #struct ")=%d\n", sizeof(struct))
 
-static const char* file = "test.data";
+static const char* file = "..\\parsec\\test.data";
 
 
 static void make_file()
@@ -17,6 +17,8 @@ static void make_file()
 		MY_STRUCT s;
 		memset(&s, 0, sizeof(s));
 		s.index = 0;
+		for  ( int i = 0; i <sizeof(s.enum_sized); i++)
+			s.enum_sized[i] = 100+i;
 		strcpy(s.ms.simp1, "one");
 		s.ms.simp2 = 2;
 		s.mi = 3;
@@ -47,7 +49,7 @@ static void make_file()
 		s.l1 = 28;
 		s.s1 = 29;
 		s.us1 = 30;
-		s.f1 = 31.31313131313131;
+		s.f1 = 31.31313131313131F;
 		s.d1 = 32.32323232323232323232;
 		s.ll1 = 100000000000033LL;
 		s.ain1[0] = 34;

@@ -35,9 +35,9 @@ typedef int MYINT;
 
 typedef struct _my_struct
 {
-	int enum_sized[EMAX + 1];
-
 	int index;
+
+	int enum_sized[EMAX + 1];
 	MY_SIMPLE ms;
 	MYINT mi;
 	MY_SIMPLE msa[5];
