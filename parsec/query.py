@@ -77,10 +77,34 @@ def _dump(buf, t, baseOffset=0, arraySize=0):
             print( t.name+"="+str(v))
 
 def dump(buf, t, baseOffset=0):
-
     _dump(buf,t,baseOffset,t.arraySize)
 
-def readData(structName, t):
+def outputFieldNames(t, fields, arraySize=0):
+    for f in fields:
+        print( f )
+
+    #if arraySize > 0 and t.dataType != "char":
+    #
+    #    for i in range(0,arraySize-1):
+    #        outputFieldNames(_dump(buf,t, baseOffset + i * t.dataSize, 0)
+    #
+    #else:
+    #
+    #    if t.dataType == "Struct":
+    #        for f in t.fields:
+    #            _dump(buf,f, baseOffset + f.offset, f.arraySize)
+    #    else:
+    #        v = extractData( buf, t, baseOffset )
+    #        print( t.name+"="+str(v))
+    pass
+
+def outputFields(t, fields, buf):
+
+    for f in fields:
+        #_dump(buf,t,baseOffset,t.arraySize)
+        pass
+
+def executeQuery(structName, t, fields, where):
     file = tables[structName]
 
     recordSize = t.getDataSize()
@@ -89,13 +113,16 @@ def readData(structName, t):
     if int(fileSize/recordSize)*recordSize != fileSize:
         raise Exception("File is not a multiple of recordsize")
 
+    outputFieldNames(t,fields)
     with open( file["dataFile"], "rb" ) as f:
         while True:
             buf = f.read(recordSize)
-            break
-
-    # Dump the record
-    dump(buf, t)
+            if not buf:
+                break
+            if where != None:
+                if not where.match(buf,t):
+                    continue
+            outputFields(t, fields, buf)
 
 
 def findQueryColumns(node):
@@ -106,6 +133,7 @@ def findQueryColumns(node):
         for c in node.getchildren():
             lst.extend( findQueryColumns(c) )
         return lst
+
 
 if __name__ == "__main__":
 
@@ -150,13 +178,20 @@ if __name__ == "__main__":
 
     # Find the columns
     columns = findQueryColumns(s.findNode("[FIELDS]"))
+    print("columns")
     print( columns )
     fields = t.findFields( columns )
+    print("fields")
     print(fields)
 
 
     # Find the where
-    readData(tableName,t)
+    print("Where")
+
+
+    # 
+    executeQuery(tableName,t, fields, None)
+    
 
 r''' 
 
