@@ -7,6 +7,7 @@ from pathlib import Path
 from parsec import StructParser
 #from sql import Sql
 from yacc import Sql
+from common import Log
 
 tables = { 
     "MY_STRUCT": { "sourceFile": "test.h", "dataFile": "test.data" },
@@ -74,14 +75,14 @@ def _dump(buf, t, baseOffset=0, arraySize=0):
                 _dump(buf,f, baseOffset + f.offset, f.arraySize)
         else:
             v = extractData( buf, t, baseOffset )
-            print( t.name+"="+str(v))
+            Log( t.name+"="+str(v))
 
 def dump(buf, t, baseOffset=0):
     _dump(buf,t,baseOffset,t.arraySize)
 
 def outputFieldNames(t, fields, arraySize=0):
     for f in fields:
-        print( f )
+        Log( f )
 
     #if arraySize > 0 and t.dataType != "char":
     #
@@ -95,7 +96,7 @@ def outputFieldNames(t, fields, arraySize=0):
     #            _dump(buf,f, baseOffset + f.offset, f.arraySize)
     #    else:
     #        v = extractData( buf, t, baseOffset )
-    #        print( t.name+"="+str(v))
+    #        Log( t.name+"="+str(v))
     pass
 
 def outputFields(t, fields, buf):
@@ -137,11 +138,6 @@ def findQueryColumns(node):
 
 if __name__ == "__main__":
 
-    #if len(sys.argv) > 1:
-    #    c_decl = sys.argv[1]
-    #else:
-    #    c_decl = "char *(*(**foo[][8])())[];"
-
     s = Sql("Select index, mi, * from MY_STRUCT where index = 4 or index = 7")
 
     node = s.findNode( "[TABLE]" )
@@ -161,15 +157,15 @@ if __name__ == "__main__":
     parser = StructParser()
     parser.Parse( tableData["sourceFile"] )
 
-    #print( "typedefs" )
+    #Log( "typedefs" )
     #for k in parser.typedefs:
-    #    print("    "+k)
-    #print( "structs" )
+    #    Log("    "+k)
+    #Log( "structs" )
     #for k in parser.structs:
-    #    print("    "+k)
-    #print( "unions" )
+    #    Log("    "+k)
+    #Log( "unions" )
     #for k in parser.unions:
-    #    print("    "+k)
+    #    Log("    "+k)
 
 
     t = parser.MakeType(tableName)
@@ -178,15 +174,15 @@ if __name__ == "__main__":
 
     # Find the columns
     columns = findQueryColumns(s.findNode("[FIELDS]"))
-    print("columns")
-    print( columns )
+    Log("columns")
+    Log( columns )
     fields = t.findFields( columns )
-    print("fields")
-    print(fields)
+    Log("fields")
+    Log(fields)
 
 
     # Find the where
-    print("Where")
+    Log("Where")
 
 
     # 

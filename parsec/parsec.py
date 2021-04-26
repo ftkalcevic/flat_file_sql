@@ -1,6 +1,8 @@
 import copy
 import sys
 import io
+import common
+from common import Log
 
 from pycparser import c_parser, c_ast
 
@@ -235,8 +237,12 @@ class StructParser:
     def evaluate(self, node):
         
         if type(node) == c_ast.Constant:
-            assert node.type == "int"
-            return int(node.value)
+            if node.type == "int":
+                return int(node.value)
+            elif node.type == "char":
+                return 0
+            else:
+                raise Exception("Unknown constant type - " + node.type )
         elif type(node) == c_ast.BinaryOp:
             if node.op == '+':
                 return self.evaluate(node.left) + self.evaluate(node.right)
@@ -246,11 +252,20 @@ class StructParser:
                 return int(self.evaluate(node.left) * self.evaluate(node.right))
             elif node.op == '/':
                 return int(self.evaluate(node.left) / self.evaluate(node.right))
+            elif node.op == '<<':
+                return int(self.evaluate(node.left) << self.evaluate(node.right))
+            elif node.op == '>>':
+                return int(self.evaluate(node.left) >> self.evaluate(node.right))
             else:
                 raise Exception("Unkown binaryOp type - " + node.op )
         elif type(node) == c_ast.ID:
             name = node.name;
             return self.enumValues[name]
+        elif type(node) == c_ast.UnaryOp:
+            if node.op == '-':
+                return -1 * self.evaluate( node.expr)
+            else:
+                raise Exception("Unkown unaryOp type - " + node.op )
         else:
             raise Exception("evaluate unknown node type - " + node )
 
@@ -263,7 +278,7 @@ class StructParser:
                 value = self.evaluate(e.value);
 
             self.enumValues[name] = value
-            print( e.name, value )
+            Log( e.name, value )
             value += 1;
         pass
 
@@ -302,7 +317,8 @@ class StructParser:
         if (not isinstance(node, c_ast.FileAST) or not isinstance(node.ext[-1], c_ast.Decl)):
             raise Exception("Not a valid declaration")
 
-        node.show()
+        if common.doLog:
+            node.show()
         self.extract_types( node )    
 
     def MakeType(self, typename):
@@ -311,7 +327,8 @@ class StructParser:
 
         t = CType(self, node)
         t.computeOffsets()
-        t.print()
+        if common.doLog:
+            t.print()
         return t
 
 

@@ -6,6 +6,8 @@ import ply.yacc as yacc
 import re
 from math import *
 from node import node
+import common
+
 
 #TOKENS
 tokens=('SELECT','FROM','WHERE','NAME','AND','OR','COMMA',
@@ -214,7 +216,8 @@ class Sql:
 
     def __init__(self, query):
         self.parse=yacc.parse(query)
-        self.parse.print_node(0)
+        if common.doLog:
+            self.parse.print_node(0)
 
     def findNode(self, name):
         return self.parse.find(name)

@@ -13,6 +13,13 @@ typedef enum
 	EMAX
 };
 
+typedef enum
+{
+	ER = 1 << E4,
+	ES = -1,
+	ET = 'I'
+};
+
 typedef struct _my_simple
 {
 	char simp1[(12*2)/2 + 1 - 2];
