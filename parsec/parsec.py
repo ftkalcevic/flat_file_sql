@@ -89,24 +89,6 @@ class CType:
     def evaluateBinaryOp(self, dim):
         pass
 
-    def getArraySize(self,dim):
-        
-        if type(dim) == c_ast.Constant:
-            assert dim.type == "int"
-            return int(dim.value)
-        elif type(dim) == c_ast.BinaryOp:
-
-            if dim.op == '+':
-                return self.getArraySize(dim.left) + self.getArraySize(dim.right)
-            elif dim.op == '-':
-                return self.getArraySize(dim.left) - self.getArraySize(dim.right)
-            elif dim.op == '*':
-                return int(self.getArraySize(dim.left) * self.getArraySize(dim.right))
-            elif dim.op == '/':
-                return int(self.getArraySize(dim.left) / self.getArraySize(dim.right))
-            else:
-                raise Exception("Unkown binaryOp type - " + dim.op )
-
     def processTypeDecl(self,node):
 
         if self.name == "":
@@ -240,9 +222,10 @@ class StructParser:
             if node.type == "int":
                 return int(node.value)
             elif node.type == "char":
-                return 0
+                return ord(eval(node.value))
             else:
                 raise Exception("Unknown constant type - " + node.type )
+
         elif type(node) == c_ast.BinaryOp:
             if node.op == '+':
                 return self.evaluate(node.left) + self.evaluate(node.right)
@@ -258,9 +241,11 @@ class StructParser:
                 return int(self.evaluate(node.left) >> self.evaluate(node.right))
             else:
                 raise Exception("Unkown binaryOp type - " + node.op )
+
         elif type(node) == c_ast.ID:
             name = node.name;
             return self.enumValues[name]
+
         elif type(node) == c_ast.UnaryOp:
             if node.op == '-':
                 return -1 * self.evaluate( node.expr)

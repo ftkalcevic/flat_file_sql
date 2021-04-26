@@ -138,9 +138,9 @@ def findQueryColumns(node):
 
 if __name__ == "__main__":
 
-    s = Sql("Select index, mi, * from MY_STRUCT where index = 4 or index = 7")
+    sql = Sql("Select index, mi, * from MY_STRUCT where index = 4 or index = 7")
 
-    node = s.findNode( "[TABLE]" )
+    node = sql.findNode( "[TABLE]" )
 
     if node == None:
         raise Exception( "table not specified in query")
@@ -173,20 +173,23 @@ if __name__ == "__main__":
         raise Exception( "Unknown table '" + tableName + "'")
 
     # Find the columns
-    columns = findQueryColumns(s.findNode("[FIELDS]"))
+    columns = findQueryColumns(sql.findNode("[FIELDS]"))
     Log("columns")
     Log( columns )
+
     fields = t.findFields( columns )
     Log("fields")
     Log(fields)
 
 
     # Find the where
-    Log("Where")
+    where = sql.findNode("[WHERE]")
+    Log("where")
+    Log(where)
 
-
+    where = None
     # 
-    executeQuery(tableName,t, fields, None)
+    executeQuery(tableName,t, fields, where)
     
 
 r''' 

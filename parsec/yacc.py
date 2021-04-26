@@ -114,12 +114,12 @@ def p_table(t):
     if len(t)==2:
         t[0]=node('[TABLE]')
         t[0].add(node(t[1]))
-    elif t[2]=='AS' and isinstance(t[1], node):
+    elif t[2].upper()=='AS' and isinstance(t[1], node):
         t[0]=node('[TABLE]')
         t[0].add(t[1])
         t[0].add(node('AS'))
         t[0].add(node(t[3]))
-    elif t[2]=='AS' and not isinstance(t[1], node):
+    elif t[2].upper()=='AS' and not isinstance(t[1], node):
         t[0]=node('[TABLE]')
         t[0].add(node(t[1]))
         t[0].add(node('AS'))
@@ -139,21 +139,17 @@ def p_lst(t):
     if len(t)==2:
         t[0]=node('[CONDITION]')
         t[0].add(t[1])
-    elif t[2]==',':
-        t[0]=node('[CONDITIONS]')
-        t[0].add(t[1])
-        t[0].add(t[3])
-    elif t[2]=='AND':
+    elif t[2].upper()=='AND':
         t[0]=node('[CONDITIONS]')
         t[0].add(t[1])
         t[0].add(node('[AND]'))
         t[0].add(t[3])
-    elif t[2]=='OR':
+    elif t[2].upper()=='OR':
         t[0]=node('[CONDITIONS]')
         t[0].add(t[1])
         t[0].add(node('[OR]'))
         t[0].add(t[3])
-    elif t[2]=='BETWEEN':
+    elif t[2].upper()=='BETWEEN':
         temp='%s >= %s & %s <= %s'%(t[1],str(t[3]),t[1],str(t[5]))
         t[0]=node('[CONDITION]')
         t[0].add(node('[TERM]'))
