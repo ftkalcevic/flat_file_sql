@@ -16,6 +16,14 @@ tables = {
 
 order = 'little'
 
+class Where:
+    def __init__(self, clause):
+        pass
+
+    def match(self, buf, t):
+        return True
+
+
 def extractData( buf, t, offset):
 
     if t.dataType in ("char" ) and t.arraySize > 0:
@@ -183,7 +191,7 @@ if __name__ == "__main__":
 
 
     # Find the where
-    where = sql.findNode("[WHERE]")
+    where = Where(sql.findNode("[WHERE]"))
     Log("where")
     Log(where)
 
@@ -200,6 +208,8 @@ r'''
 struct_name.*
 array_member.*
 array[number].*
+array[*]
+array[]
     
 each "column" will be a class instance, keeping a pointer to the internal structure.
 when it comes time to output, we'll take as an input, the byte array of the structure, then we can iterate from where we are?
