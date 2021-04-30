@@ -191,9 +191,10 @@ if __name__ == "__main__":
 
 
     # Find the where
-    where = Where(sql.findNode("[WHERE]"))
+    whereNode = sql.findNode("[WHERE]")
+    where = Where(whereNode)
     Log("where")
-    Log(where)
+    Log(whereNode)
 
     where = None
     # 
