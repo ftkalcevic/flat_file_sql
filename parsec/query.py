@@ -33,10 +33,14 @@ def extractData( buf, t, offset):
                 break;
             else:
                 s += chr(buf[i])
-        return s
+        return "'" + s + "'"
 
     elif t.dataType in ("char" ):
-        s = chr(buf[offset])
+        n = buf[offset]
+        if n < 32 or n > 127:
+            s = "'\\x" + format(n,'x') + "'"
+        else:
+            s = "'" + chr(n) + "'"
         return s
 
     elif t.dataType in ("int", "unsigned int", "signed int", 
@@ -61,12 +65,12 @@ def extractData( buf, t, offset):
 
     elif t.dataType in ("float" ):
         fbuf = buf[offset:offset+4]
-        n = struct.unpack( 'f', fbuf )
+        n = struct.unpack( 'f', fbuf )[0]
         return n
 
     elif t.dataType in ("double" ):
         fbuf = buf[offset:offset+8]
-        n = struct.unpack( 'd', fbuf )
+        n = struct.unpack( 'd', fbuf )[0]
         return n
 
 
@@ -88,30 +92,25 @@ def _dump(buf, t, baseOffset=0, arraySize=0):
 def dump(buf, t, baseOffset=0):
     _dump(buf,t,baseOffset,t.arraySize)
 
-def outputFieldNames(t, fields, arraySize=0):
+def outputFieldNames(fields):
+    first = True
     for f in fields:
-        Log( f )
+        if not first:
+            print(",", end='')
+        #print( f.name+":"+str(f.offset), end='' )
+        print( f.name, end='' )
+        first = False
+    print()
 
-    #if arraySize > 0 and t.dataType != "char":
-    #
-    #    for i in range(0,arraySize-1):
-    #        outputFieldNames(_dump(buf,t, baseOffset + i * t.dataSize, 0)
-    #
-    #else:
-    #
-    #    if t.dataType == "Struct":
-    #        for f in t.fields:
-    #            _dump(buf,f, baseOffset + f.offset, f.arraySize)
-    #    else:
-    #        v = extractData( buf, t, baseOffset )
-    #        Log( t.name+"="+str(v))
-    pass
-
-def outputFields(t, fields, buf):
-
+def outputFields(fields, buf):
+    first = True
     for f in fields:
-        #_dump(buf,t,baseOffset,t.arraySize)
-        pass
+        value = extractData( buf, f.ctype, f.offset)
+        if not first:
+            print(",", end='')
+        print( value, end='' )
+        first = False
+    print()
 
 def executeQuery(structName, t, fields, where):
     file = tables[structName]
@@ -122,7 +121,7 @@ def executeQuery(structName, t, fields, where):
     if int(fileSize/recordSize)*recordSize != fileSize:
         raise Exception("File is not a multiple of recordsize")
 
-    outputFieldNames(t,fields)
+    outputFieldNames(fields)
     with open( file["dataFile"], "rb" ) as f:
         while True:
             buf = f.read(recordSize)
@@ -131,7 +130,7 @@ def executeQuery(structName, t, fields, where):
             if where != None:
                 if not where.match(buf,t):
                     continue
-            outputFields(t, fields, buf)
+            outputFields(fields, buf)
 
 
 def findQueryColumns(node):
@@ -146,7 +145,8 @@ def findQueryColumns(node):
 
 if __name__ == "__main__":
 
-    sql = Sql("Select index, mi, * from MY_STRUCT where index = 4 or index = 7")
+    #sql = Sql("Select index, mi, MY_STRUCT.why.b, why.c, * from MY_STRUCT where index = 4 or index = 7")
+    sql = Sql("Select index, mi, why.* from MY_STRUCT where index = 4 or index = 7")
 
     node = sql.findNode( "[TABLE]" )
 
@@ -185,9 +185,9 @@ if __name__ == "__main__":
     Log("columns")
     Log( columns )
 
-    fields = t.findFields( columns )
+    columnFields = t.findFields( columns )
     Log("fields")
-    Log(fields)
+    Log(columnFields)
 
 
     # Find the where
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     where = None
     # 
-    executeQuery(tableName,t, fields, where)
+    executeQuery(tableName,t, columnFields, where)
     
 
 r''' 

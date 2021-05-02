@@ -1,6 +1,7 @@
 import copy
 import sys
 import io
+import re
 import common
 from common import Log
 
@@ -17,6 +18,12 @@ def getTypeSize(t):
         return 8
     else:
         raise Exception("Unknown type - " + t)
+
+class FieldInstance:
+    def __init__(self, name, ctype, offset ):
+        self.name = name
+        self.offset = offset
+        self.ctype = ctype
 
 class CType:
     def __init__(self, parser, node):
@@ -179,27 +186,71 @@ class CType:
         else:
             raise Exception("Unknown typedecl subtype - " + str(type(node.type)) )
 
-    def _findAllFields(self, name):
+    def _findAllFields(self, name, offset, arraySuffix = ""):
         lst = []
-        name = name + '.' + self.name
-        lst.extend( [name, self.offset] )
+        name = name + '.' + self.name + arraySuffix
+        if not (self.dataType == 'Struct' or self.dataType == 'Union'):
+            field = FieldInstance( name, self, offset)
+            lst.append( field )
+
         for f in self.fields:
-            lst.extend( f._findAllFields( name ) )
+            lst.extend( f._findAllFields( name, offset + f.offset ) )
         return lst
 
+    # Process * (or struct.*, etc)
     def findAllFields(self):
         lst = []
         name = self.name
         for f in self.fields:
-            lst.extend( f._findAllFields( name ) )
+            if f.arraySize > 0 and f.dataType != 'char':
+                for i in range(0,f.arraySize):
+                    lst.extend( f._findAllFields( name, f.offset + i * f.dataSize, "[" + str(i) + "]" ) ) # array element
+            else:
+                lst.extend( f._findAllFields( name, f.offset ) )  # field
         return lst
+
+    def match( self, fieldName, columnName):
+        if fieldName == columnName:
+            return True
+        else:
+            return False
+
+    def findField(self, allFields, column ):
+
+        # Main structure name is optional, but we require it for matching
+
+        if column[0:len(self.name)] != self.name:
+            columnExpr = self.name + "\." + column
+        else:
+            columnExpr = column
+
+        rex = re.compile(columnExpr)
+        fields = []
+        for f in allFields:
+            if re.match( rex, f.name ):
+                fields.append( f )
+        return fields
+
+    def makeRegexp( self, exp ):
+        s = ""
+        for c in exp:
+            if c in ('.', '?', '[', ']'):
+                s += '\\' + c
+            elif c == '*':
+                s += '.*'
+            else:
+                s += c
+
+        return s
 
     def findFields( self, columns ):
 
+        allFields = self.findAllFields()
+
         fields = []
         for c in columns:
-            if c == '*':
-                fields.extend( self.findAllFields() )
+            rex = self.makeRegexp( c )
+            fields.extend( self.findField(allFields,rex) )
 
         return fields
 
@@ -263,7 +314,7 @@ class StructParser:
                 value = self.evaluate(e.value);
 
             self.enumValues[name] = value
-            Log( e.name, value )
+            #Log( e.name, value )
             value += 1;
         pass
 
@@ -302,8 +353,8 @@ class StructParser:
         if (not isinstance(node, c_ast.FileAST) or not isinstance(node.ext[-1], c_ast.Decl)):
             raise Exception("Not a valid declaration")
 
-        if common.doLog:
-            node.show()
+        #if common.doLog:
+        #    node.show()
         self.extract_types( node )    
 
     def MakeType(self, typename):
@@ -312,8 +363,8 @@ class StructParser:
 
         t = CType(self, node)
         t.computeOffsets()
-        if common.doLog:
-            t.print()
+        #if common.doLog:
+        #    t.print()
         return t
 
 
