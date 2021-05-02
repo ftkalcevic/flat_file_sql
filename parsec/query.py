@@ -146,7 +146,8 @@ def findQueryColumns(node):
 if __name__ == "__main__":
 
     #sql = Sql("Select index, mi, MY_STRUCT.why.b, why.c, * from MY_STRUCT where index = 4 or index = 7")
-    sql = Sql("Select index, mi, why.* from MY_STRUCT where index = 4 or index = 7")
+    #sql = Sql("Select index, mi, why.* from MY_STRUCT where index = 4 or index = 7 and mi in (1,2,3) or msa[1].simp2 between 1 and 5")
+    sql = Sql("Select index, mi, why.* from MY_STRUCT where msa[1].simp2 = 1")
 
     node = sql.findNode( "[TABLE]" )
 

@@ -29,7 +29,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="parsec.py" />
-    <Compile Include="sql.py" />
     <Compile Include="yacc.py" />
   </ItemGroup>
   <ItemGroup>
