@@ -11,55 +11,67 @@ Rule 5     table -> NAME
 Rule 6     table -> LP query RP
 Rule 7     table -> NAME AS NAME
 Rule 8     table -> table AS NAME
-Rule 9     lst -> condition
-Rule 10    lst -> condition AND condition
-Rule 11    lst -> condition OR condition
-Rule 12    lst -> NAME BETWEEN NUMBER AND NUMBER
-Rule 13    condition -> NAME > NUMBER
-Rule 14    condition -> NAME < NUMBER
-Rule 15    condition -> NAME = NUMBER
-Rule 16    condition -> NAME > NAME
-Rule 17    condition -> NAME < NAME
-Rule 18    condition -> NAME = NAME
-Rule 19    condition -> list > list
-Rule 20    condition -> list < list
-Rule 21    condition -> list = list
-Rule 22    condition -> list > NUMBER
-Rule 23    condition -> list < NUMBER
-Rule 24    condition -> list = NUMBER
-Rule 25    list -> *
-Rule 26    list -> NAME
-Rule 27    list -> NAME DOT NAME
-Rule 28    list -> list COMMA list
-Rule 29    list -> list AND NAME
-Rule 30    list -> list OR NAME
+Rule 9     const_list -> const_list COMMA NUMBER
+Rule 10    const_list -> NUMBER
+Rule 11    lst -> condition
+Rule 12    lst -> lst AND condition
+Rule 13    lst -> lst OR condition
+Rule 14    condition -> NAME > NUMBER
+Rule 15    condition -> NAME < NUMBER
+Rule 16    condition -> NAME = NUMBER
+Rule 17    condition -> NAME GE NUMBER
+Rule 18    condition -> NAME LE NUMBER
+Rule 19    condition -> NAME NE NUMBER
+Rule 20    condition -> NAME > NAME
+Rule 21    condition -> NAME < NAME
+Rule 22    condition -> NAME = NAME
+Rule 23    condition -> NAME GE NAME
+Rule 24    condition -> NAME LE NAME
+Rule 25    condition -> NAME NE NAME
+Rule 26    condition -> list > list
+Rule 27    condition -> list < list
+Rule 28    condition -> list = list
+Rule 29    condition -> list > NUMBER
+Rule 30    condition -> list < NUMBER
+Rule 31    condition -> list = NUMBER
+Rule 32    condition -> NAME BETWEEN NUMBER AND NUMBER
+Rule 33    condition -> NAME IN LP const_list RP
+Rule 34    list -> *
+Rule 35    list -> NAME
+Rule 36    list -> NAME DOT NAME
+Rule 37    list -> list COMMA list
 
 Terminals, with rules where they appear
 
-*                    : 25
-<                    : 14 17 20 23
-=                    : 15 18 21 24
->                    : 13 16 19 22
-AND                  : 10 12 29
+*                    : 34
+<                    : 15 21 27 30
+=                    : 16 22 28 31
+>                    : 14 20 26 29
+AND                  : 12 32
 AS                   : 7 8
-BETWEEN              : 12
-COMMA                : 28
-DOT                  : 27
+BETWEEN              : 32
+COMMA                : 9 37
+DOT                  : 36
 FROM                 : 3 4
-LP                   : 2 6
-NAME                 : 5 7 7 8 12 13 14 15 16 16 17 17 18 18 26 27 27 29 30
-NUMBER               : 12 12 13 14 15 22 23 24
-OR                   : 11 30
-RP                   : 2 6
+GE                   : 17 23
+IN                   : 33
+LE                   : 18 24
+LP                   : 2 6 33
+NAME                 : 5 7 7 8 14 15 16 17 18 19 20 20 21 21 22 22 23 23 24 24 25 25 32 33 35 36 36
+NE                   : 19 25
+NUMBER               : 9 10 14 15 16 17 18 19 29 30 31 32 32
+OR                   : 13
+RP                   : 2 6 33
 SELECT               : 3 4
 WHERE                : 3
 error                : 
 
 Nonterminals, with rules where they appear
 
-condition            : 9 10 10 11 11
-list                 : 3 4 19 19 20 20 21 21 22 23 24 28 28 29 30
-lst                  : 3
+condition            : 11 12 13
+const_list           : 9 33
+list                 : 3 4 26 26 27 27 28 28 29 30 31 37 37
+lst                  : 3 12 13
 query                : 2 6 0
 select               : 1
 table                : 3 4 8
@@ -112,12 +124,10 @@ state 4
 
     (3) select -> SELECT . list FROM table WHERE lst
     (4) select -> SELECT . list FROM table
-    (25) list -> . *
-    (26) list -> . NAME
-    (27) list -> . NAME DOT NAME
-    (28) list -> . list COMMA list
-    (29) list -> . list AND NAME
-    (30) list -> . list OR NAME
+    (34) list -> . *
+    (35) list -> . NAME
+    (36) list -> . NAME DOT NAME
+    (37) list -> . list COMMA list
 
     *               shift and go to state 7
     NAME            shift and go to state 8
@@ -135,46 +145,42 @@ state 6
 
     (3) select -> SELECT list . FROM table WHERE lst
     (4) select -> SELECT list . FROM table
-    (28) list -> list . COMMA list
-    (29) list -> list . AND NAME
-    (30) list -> list . OR NAME
+    (37) list -> list . COMMA list
 
     FROM            shift and go to state 10
     COMMA           shift and go to state 11
-    AND             shift and go to state 12
-    OR              shift and go to state 13
 
 
 state 7
 
-    (25) list -> * .
+    (34) list -> * .
 
-    FROM            reduce using rule 25 (list -> * .)
-    COMMA           reduce using rule 25 (list -> * .)
-    AND             reduce using rule 25 (list -> * .)
-    OR              reduce using rule 25 (list -> * .)
-    >               reduce using rule 25 (list -> * .)
-    <               reduce using rule 25 (list -> * .)
-    =               reduce using rule 25 (list -> * .)
-    $end            reduce using rule 25 (list -> * .)
-    RP              reduce using rule 25 (list -> * .)
+    FROM            reduce using rule 34 (list -> * .)
+    COMMA           reduce using rule 34 (list -> * .)
+    >               reduce using rule 34 (list -> * .)
+    <               reduce using rule 34 (list -> * .)
+    =               reduce using rule 34 (list -> * .)
+    AND             reduce using rule 34 (list -> * .)
+    OR              reduce using rule 34 (list -> * .)
+    $end            reduce using rule 34 (list -> * .)
+    RP              reduce using rule 34 (list -> * .)
 
 
 state 8
 
-    (26) list -> NAME .
-    (27) list -> NAME . DOT NAME
+    (35) list -> NAME .
+    (36) list -> NAME . DOT NAME
 
-    FROM            reduce using rule 26 (list -> NAME .)
-    COMMA           reduce using rule 26 (list -> NAME .)
-    AND             reduce using rule 26 (list -> NAME .)
-    OR              reduce using rule 26 (list -> NAME .)
-    >               reduce using rule 26 (list -> NAME .)
-    <               reduce using rule 26 (list -> NAME .)
-    =               reduce using rule 26 (list -> NAME .)
-    $end            reduce using rule 26 (list -> NAME .)
-    RP              reduce using rule 26 (list -> NAME .)
-    DOT             shift and go to state 14
+    FROM            reduce using rule 35 (list -> NAME .)
+    COMMA           reduce using rule 35 (list -> NAME .)
+    >               reduce using rule 35 (list -> NAME .)
+    <               reduce using rule 35 (list -> NAME .)
+    =               reduce using rule 35 (list -> NAME .)
+    AND             reduce using rule 35 (list -> NAME .)
+    OR              reduce using rule 35 (list -> NAME .)
+    $end            reduce using rule 35 (list -> NAME .)
+    RP              reduce using rule 35 (list -> NAME .)
+    DOT             shift and go to state 12
 
 
 state 9
@@ -194,60 +200,44 @@ state 10
     (7) table -> . NAME AS NAME
     (8) table -> . table AS NAME
 
-    NAME            shift and go to state 16
-    LP              shift and go to state 17
+    NAME            shift and go to state 14
+    LP              shift and go to state 15
 
-    table                          shift and go to state 15
+    table                          shift and go to state 13
 
 state 11
 
-    (28) list -> list COMMA . list
-    (25) list -> . *
-    (26) list -> . NAME
-    (27) list -> . NAME DOT NAME
-    (28) list -> . list COMMA list
-    (29) list -> . list AND NAME
-    (30) list -> . list OR NAME
+    (37) list -> list COMMA . list
+    (34) list -> . *
+    (35) list -> . NAME
+    (36) list -> . NAME DOT NAME
+    (37) list -> . list COMMA list
 
     *               shift and go to state 7
     NAME            shift and go to state 8
 
-    list                           shift and go to state 18
+    list                           shift and go to state 16
 
 state 12
 
-    (29) list -> list AND . NAME
+    (36) list -> NAME DOT . NAME
 
-    NAME            shift and go to state 19
+    NAME            shift and go to state 17
 
 
 state 13
-
-    (30) list -> list OR . NAME
-
-    NAME            shift and go to state 20
-
-
-state 14
-
-    (27) list -> NAME DOT . NAME
-
-    NAME            shift and go to state 21
-
-
-state 15
 
     (3) select -> SELECT list FROM table . WHERE lst
     (4) select -> SELECT list FROM table .
     (8) table -> table . AS NAME
 
-    WHERE           shift and go to state 22
+    WHERE           shift and go to state 18
     $end            reduce using rule 4 (select -> SELECT list FROM table .)
     RP              reduce using rule 4 (select -> SELECT list FROM table .)
-    AS              shift and go to state 23
+    AS              shift and go to state 19
 
 
-state 16
+state 14
 
     (5) table -> NAME .
     (7) table -> NAME . AS NAME
@@ -256,12 +246,12 @@ state 16
     WHERE           reduce using rule 5 (table -> NAME .)
     $end            reduce using rule 5 (table -> NAME .)
     RP              reduce using rule 5 (table -> NAME .)
-    AS              shift and go to state 24
+    AS              shift and go to state 20
 
   ! AS              [ reduce using rule 5 (table -> NAME .) ]
 
 
-state 17
+state 15
 
     (6) table -> LP . query RP
     (1) query -> . select
@@ -272,203 +262,179 @@ state 17
     LP              shift and go to state 3
     SELECT          shift and go to state 4
 
-    query                          shift and go to state 25
+    query                          shift and go to state 21
     select                         shift and go to state 2
+
+state 16
+
+    (37) list -> list COMMA list .
+    (37) list -> list . COMMA list
+
+  ! shift/reduce conflict for COMMA resolved as shift
+    FROM            reduce using rule 37 (list -> list COMMA list .)
+    >               reduce using rule 37 (list -> list COMMA list .)
+    <               reduce using rule 37 (list -> list COMMA list .)
+    =               reduce using rule 37 (list -> list COMMA list .)
+    AND             reduce using rule 37 (list -> list COMMA list .)
+    OR              reduce using rule 37 (list -> list COMMA list .)
+    $end            reduce using rule 37 (list -> list COMMA list .)
+    RP              reduce using rule 37 (list -> list COMMA list .)
+    COMMA           shift and go to state 11
+
+  ! COMMA           [ reduce using rule 37 (list -> list COMMA list .) ]
+
+
+state 17
+
+    (36) list -> NAME DOT NAME .
+
+    FROM            reduce using rule 36 (list -> NAME DOT NAME .)
+    COMMA           reduce using rule 36 (list -> NAME DOT NAME .)
+    >               reduce using rule 36 (list -> NAME DOT NAME .)
+    <               reduce using rule 36 (list -> NAME DOT NAME .)
+    =               reduce using rule 36 (list -> NAME DOT NAME .)
+    AND             reduce using rule 36 (list -> NAME DOT NAME .)
+    OR              reduce using rule 36 (list -> NAME DOT NAME .)
+    $end            reduce using rule 36 (list -> NAME DOT NAME .)
+    RP              reduce using rule 36 (list -> NAME DOT NAME .)
+
 
 state 18
 
-    (28) list -> list COMMA list .
-    (28) list -> list . COMMA list
-    (29) list -> list . AND NAME
-    (30) list -> list . OR NAME
+    (3) select -> SELECT list FROM table WHERE . lst
+    (11) lst -> . condition
+    (12) lst -> . lst AND condition
+    (13) lst -> . lst OR condition
+    (14) condition -> . NAME > NUMBER
+    (15) condition -> . NAME < NUMBER
+    (16) condition -> . NAME = NUMBER
+    (17) condition -> . NAME GE NUMBER
+    (18) condition -> . NAME LE NUMBER
+    (19) condition -> . NAME NE NUMBER
+    (20) condition -> . NAME > NAME
+    (21) condition -> . NAME < NAME
+    (22) condition -> . NAME = NAME
+    (23) condition -> . NAME GE NAME
+    (24) condition -> . NAME LE NAME
+    (25) condition -> . NAME NE NAME
+    (26) condition -> . list > list
+    (27) condition -> . list < list
+    (28) condition -> . list = list
+    (29) condition -> . list > NUMBER
+    (30) condition -> . list < NUMBER
+    (31) condition -> . list = NUMBER
+    (32) condition -> . NAME BETWEEN NUMBER AND NUMBER
+    (33) condition -> . NAME IN LP const_list RP
+    (34) list -> . *
+    (35) list -> . NAME
+    (36) list -> . NAME DOT NAME
+    (37) list -> . list COMMA list
 
-  ! shift/reduce conflict for COMMA resolved as shift
-  ! shift/reduce conflict for AND resolved as shift
-  ! shift/reduce conflict for OR resolved as shift
-    FROM            reduce using rule 28 (list -> list COMMA list .)
-    >               reduce using rule 28 (list -> list COMMA list .)
-    <               reduce using rule 28 (list -> list COMMA list .)
-    =               reduce using rule 28 (list -> list COMMA list .)
-    $end            reduce using rule 28 (list -> list COMMA list .)
-    RP              reduce using rule 28 (list -> list COMMA list .)
-    COMMA           shift and go to state 11
-    AND             shift and go to state 12
-    OR              shift and go to state 13
+    NAME            shift and go to state 25
+    *               shift and go to state 7
 
-  ! COMMA           [ reduce using rule 28 (list -> list COMMA list .) ]
-  ! AND             [ reduce using rule 28 (list -> list COMMA list .) ]
-  ! OR              [ reduce using rule 28 (list -> list COMMA list .) ]
-
+    list                           shift and go to state 22
+    lst                            shift and go to state 23
+    condition                      shift and go to state 24
 
 state 19
 
-    (29) list -> list AND NAME .
+    (8) table -> table AS . NAME
 
-    FROM            reduce using rule 29 (list -> list AND NAME .)
-    COMMA           reduce using rule 29 (list -> list AND NAME .)
-    AND             reduce using rule 29 (list -> list AND NAME .)
-    OR              reduce using rule 29 (list -> list AND NAME .)
-    >               reduce using rule 29 (list -> list AND NAME .)
-    <               reduce using rule 29 (list -> list AND NAME .)
-    =               reduce using rule 29 (list -> list AND NAME .)
-    $end            reduce using rule 29 (list -> list AND NAME .)
-    RP              reduce using rule 29 (list -> list AND NAME .)
+    NAME            shift and go to state 26
 
 
 state 20
 
-    (30) list -> list OR NAME .
+    (7) table -> NAME AS . NAME
 
-    FROM            reduce using rule 30 (list -> list OR NAME .)
-    COMMA           reduce using rule 30 (list -> list OR NAME .)
-    AND             reduce using rule 30 (list -> list OR NAME .)
-    OR              reduce using rule 30 (list -> list OR NAME .)
-    >               reduce using rule 30 (list -> list OR NAME .)
-    <               reduce using rule 30 (list -> list OR NAME .)
-    =               reduce using rule 30 (list -> list OR NAME .)
-    $end            reduce using rule 30 (list -> list OR NAME .)
-    RP              reduce using rule 30 (list -> list OR NAME .)
+    NAME            shift and go to state 27
 
 
 state 21
 
-    (27) list -> NAME DOT NAME .
+    (6) table -> LP query . RP
 
-    FROM            reduce using rule 27 (list -> NAME DOT NAME .)
-    COMMA           reduce using rule 27 (list -> NAME DOT NAME .)
-    AND             reduce using rule 27 (list -> NAME DOT NAME .)
-    OR              reduce using rule 27 (list -> NAME DOT NAME .)
-    >               reduce using rule 27 (list -> NAME DOT NAME .)
-    <               reduce using rule 27 (list -> NAME DOT NAME .)
-    =               reduce using rule 27 (list -> NAME DOT NAME .)
-    $end            reduce using rule 27 (list -> NAME DOT NAME .)
-    RP              reduce using rule 27 (list -> NAME DOT NAME .)
+    RP              shift and go to state 28
 
 
 state 22
 
-    (3) select -> SELECT list FROM table WHERE . lst
-    (9) lst -> . condition
-    (10) lst -> . condition AND condition
-    (11) lst -> . condition OR condition
-    (12) lst -> . NAME BETWEEN NUMBER AND NUMBER
-    (13) condition -> . NAME > NUMBER
-    (14) condition -> . NAME < NUMBER
-    (15) condition -> . NAME = NUMBER
-    (16) condition -> . NAME > NAME
-    (17) condition -> . NAME < NAME
-    (18) condition -> . NAME = NAME
-    (19) condition -> . list > list
-    (20) condition -> . list < list
-    (21) condition -> . list = list
-    (22) condition -> . list > NUMBER
-    (23) condition -> . list < NUMBER
-    (24) condition -> . list = NUMBER
-    (25) list -> . *
-    (26) list -> . NAME
-    (27) list -> . NAME DOT NAME
-    (28) list -> . list COMMA list
-    (29) list -> . list AND NAME
-    (30) list -> . list OR NAME
+    (26) condition -> list . > list
+    (27) condition -> list . < list
+    (28) condition -> list . = list
+    (29) condition -> list . > NUMBER
+    (30) condition -> list . < NUMBER
+    (31) condition -> list . = NUMBER
+    (37) list -> list . COMMA list
 
-    NAME            shift and go to state 29
-    *               shift and go to state 7
+    >               shift and go to state 29
+    <               shift and go to state 30
+    =               shift and go to state 31
+    COMMA           shift and go to state 11
 
-    list                           shift and go to state 26
-    lst                            shift and go to state 27
-    condition                      shift and go to state 28
 
 state 23
 
-    (8) table -> table AS . NAME
+    (3) select -> SELECT list FROM table WHERE lst .
+    (12) lst -> lst . AND condition
+    (13) lst -> lst . OR condition
 
-    NAME            shift and go to state 30
+    $end            reduce using rule 3 (select -> SELECT list FROM table WHERE lst .)
+    RP              reduce using rule 3 (select -> SELECT list FROM table WHERE lst .)
+    AND             shift and go to state 32
+    OR              shift and go to state 33
 
 
 state 24
 
-    (7) table -> NAME AS . NAME
+    (11) lst -> condition .
 
-    NAME            shift and go to state 31
+    AND             reduce using rule 11 (lst -> condition .)
+    OR              reduce using rule 11 (lst -> condition .)
+    $end            reduce using rule 11 (lst -> condition .)
+    RP              reduce using rule 11 (lst -> condition .)
 
 
 state 25
 
-    (6) table -> LP query . RP
-
-    RP              shift and go to state 32
-
-
-state 26
-
-    (19) condition -> list . > list
-    (20) condition -> list . < list
-    (21) condition -> list . = list
-    (22) condition -> list . > NUMBER
-    (23) condition -> list . < NUMBER
-    (24) condition -> list . = NUMBER
-    (28) list -> list . COMMA list
-    (29) list -> list . AND NAME
-    (30) list -> list . OR NAME
-
-    >               shift and go to state 33
-    <               shift and go to state 34
-    =               shift and go to state 35
-    COMMA           shift and go to state 11
-    AND             shift and go to state 12
-    OR              shift and go to state 13
-
-
-state 27
-
-    (3) select -> SELECT list FROM table WHERE lst .
-
-    $end            reduce using rule 3 (select -> SELECT list FROM table WHERE lst .)
-    RP              reduce using rule 3 (select -> SELECT list FROM table WHERE lst .)
-
-
-state 28
-
-    (9) lst -> condition .
-    (10) lst -> condition . AND condition
-    (11) lst -> condition . OR condition
-
-    $end            reduce using rule 9 (lst -> condition .)
-    RP              reduce using rule 9 (lst -> condition .)
-    AND             shift and go to state 36
-    OR              shift and go to state 37
-
-
-state 29
-
-    (12) lst -> NAME . BETWEEN NUMBER AND NUMBER
-    (13) condition -> NAME . > NUMBER
-    (14) condition -> NAME . < NUMBER
-    (15) condition -> NAME . = NUMBER
-    (16) condition -> NAME . > NAME
-    (17) condition -> NAME . < NAME
-    (18) condition -> NAME . = NAME
-    (26) list -> NAME .
-    (27) list -> NAME . DOT NAME
+    (14) condition -> NAME . > NUMBER
+    (15) condition -> NAME . < NUMBER
+    (16) condition -> NAME . = NUMBER
+    (17) condition -> NAME . GE NUMBER
+    (18) condition -> NAME . LE NUMBER
+    (19) condition -> NAME . NE NUMBER
+    (20) condition -> NAME . > NAME
+    (21) condition -> NAME . < NAME
+    (22) condition -> NAME . = NAME
+    (23) condition -> NAME . GE NAME
+    (24) condition -> NAME . LE NAME
+    (25) condition -> NAME . NE NAME
+    (32) condition -> NAME . BETWEEN NUMBER AND NUMBER
+    (33) condition -> NAME . IN LP const_list RP
+    (35) list -> NAME .
+    (36) list -> NAME . DOT NAME
 
   ! shift/reduce conflict for > resolved as shift
   ! shift/reduce conflict for < resolved as shift
   ! shift/reduce conflict for = resolved as shift
-    BETWEEN         shift and go to state 38
-    >               shift and go to state 39
-    <               shift and go to state 40
-    =               shift and go to state 41
-    COMMA           reduce using rule 26 (list -> NAME .)
-    AND             reduce using rule 26 (list -> NAME .)
-    OR              reduce using rule 26 (list -> NAME .)
-    DOT             shift and go to state 14
+    >               shift and go to state 34
+    <               shift and go to state 35
+    =               shift and go to state 36
+    GE              shift and go to state 37
+    LE              shift and go to state 38
+    NE              shift and go to state 39
+    BETWEEN         shift and go to state 40
+    IN              shift and go to state 41
+    COMMA           reduce using rule 35 (list -> NAME .)
+    DOT             shift and go to state 12
 
-  ! >               [ reduce using rule 26 (list -> NAME .) ]
-  ! <               [ reduce using rule 26 (list -> NAME .) ]
-  ! =               [ reduce using rule 26 (list -> NAME .) ]
+  ! >               [ reduce using rule 35 (list -> NAME .) ]
+  ! <               [ reduce using rule 35 (list -> NAME .) ]
+  ! =               [ reduce using rule 35 (list -> NAME .) ]
 
 
-state 30
+state 26
 
     (8) table -> table AS NAME .
 
@@ -478,7 +444,7 @@ state 30
     RP              reduce using rule 8 (table -> table AS NAME .)
 
 
-state 31
+state 27
 
     (7) table -> NAME AS NAME .
 
@@ -488,7 +454,7 @@ state 31
     RP              reduce using rule 7 (table -> NAME AS NAME .)
 
 
-state 32
+state 28
 
     (6) table -> LP query RP .
 
@@ -498,16 +464,14 @@ state 32
     RP              reduce using rule 6 (table -> LP query RP .)
 
 
-state 33
+state 29
 
-    (19) condition -> list > . list
-    (22) condition -> list > . NUMBER
-    (25) list -> . *
-    (26) list -> . NAME
-    (27) list -> . NAME DOT NAME
-    (28) list -> . list COMMA list
-    (29) list -> . list AND NAME
-    (30) list -> . list OR NAME
+    (26) condition -> list > . list
+    (29) condition -> list > . NUMBER
+    (34) list -> . *
+    (35) list -> . NAME
+    (36) list -> . NAME DOT NAME
+    (37) list -> . list COMMA list
 
     NUMBER          shift and go to state 43
     *               shift and go to state 7
@@ -515,16 +479,14 @@ state 33
 
     list                           shift and go to state 42
 
-state 34
+state 30
 
-    (20) condition -> list < . list
-    (23) condition -> list < . NUMBER
-    (25) list -> . *
-    (26) list -> . NAME
-    (27) list -> . NAME DOT NAME
-    (28) list -> . list COMMA list
-    (29) list -> . list AND NAME
-    (30) list -> . list OR NAME
+    (27) condition -> list < . list
+    (30) condition -> list < . NUMBER
+    (34) list -> . *
+    (35) list -> . NAME
+    (36) list -> . NAME DOT NAME
+    (37) list -> . list COMMA list
 
     NUMBER          shift and go to state 45
     *               shift and go to state 7
@@ -532,16 +494,14 @@ state 34
 
     list                           shift and go to state 44
 
-state 35
+state 31
 
-    (21) condition -> list = . list
-    (24) condition -> list = . NUMBER
-    (25) list -> . *
-    (26) list -> . NAME
-    (27) list -> . NAME DOT NAME
-    (28) list -> . list COMMA list
-    (29) list -> . list AND NAME
-    (30) list -> . list OR NAME
+    (28) condition -> list = . list
+    (31) condition -> list = . NUMBER
+    (34) list -> . *
+    (35) list -> . NAME
+    (36) list -> . NAME DOT NAME
+    (37) list -> . list COMMA list
 
     NUMBER          shift and go to state 47
     *               shift and go to state 7
@@ -549,323 +509,428 @@ state 35
 
     list                           shift and go to state 46
 
-state 36
+state 32
 
-    (10) lst -> condition AND . condition
-    (13) condition -> . NAME > NUMBER
-    (14) condition -> . NAME < NUMBER
-    (15) condition -> . NAME = NUMBER
-    (16) condition -> . NAME > NAME
-    (17) condition -> . NAME < NAME
-    (18) condition -> . NAME = NAME
-    (19) condition -> . list > list
-    (20) condition -> . list < list
-    (21) condition -> . list = list
-    (22) condition -> . list > NUMBER
-    (23) condition -> . list < NUMBER
-    (24) condition -> . list = NUMBER
-    (25) list -> . *
-    (26) list -> . NAME
-    (27) list -> . NAME DOT NAME
-    (28) list -> . list COMMA list
-    (29) list -> . list AND NAME
-    (30) list -> . list OR NAME
+    (12) lst -> lst AND . condition
+    (14) condition -> . NAME > NUMBER
+    (15) condition -> . NAME < NUMBER
+    (16) condition -> . NAME = NUMBER
+    (17) condition -> . NAME GE NUMBER
+    (18) condition -> . NAME LE NUMBER
+    (19) condition -> . NAME NE NUMBER
+    (20) condition -> . NAME > NAME
+    (21) condition -> . NAME < NAME
+    (22) condition -> . NAME = NAME
+    (23) condition -> . NAME GE NAME
+    (24) condition -> . NAME LE NAME
+    (25) condition -> . NAME NE NAME
+    (26) condition -> . list > list
+    (27) condition -> . list < list
+    (28) condition -> . list = list
+    (29) condition -> . list > NUMBER
+    (30) condition -> . list < NUMBER
+    (31) condition -> . list = NUMBER
+    (32) condition -> . NAME BETWEEN NUMBER AND NUMBER
+    (33) condition -> . NAME IN LP const_list RP
+    (34) list -> . *
+    (35) list -> . NAME
+    (36) list -> . NAME DOT NAME
+    (37) list -> . list COMMA list
 
-    NAME            shift and go to state 49
+    NAME            shift and go to state 25
     *               shift and go to state 7
 
     condition                      shift and go to state 48
-    list                           shift and go to state 26
+    list                           shift and go to state 22
 
-state 37
+state 33
 
-    (11) lst -> condition OR . condition
-    (13) condition -> . NAME > NUMBER
-    (14) condition -> . NAME < NUMBER
-    (15) condition -> . NAME = NUMBER
-    (16) condition -> . NAME > NAME
-    (17) condition -> . NAME < NAME
-    (18) condition -> . NAME = NAME
-    (19) condition -> . list > list
-    (20) condition -> . list < list
-    (21) condition -> . list = list
-    (22) condition -> . list > NUMBER
-    (23) condition -> . list < NUMBER
-    (24) condition -> . list = NUMBER
-    (25) list -> . *
-    (26) list -> . NAME
-    (27) list -> . NAME DOT NAME
-    (28) list -> . list COMMA list
-    (29) list -> . list AND NAME
-    (30) list -> . list OR NAME
+    (13) lst -> lst OR . condition
+    (14) condition -> . NAME > NUMBER
+    (15) condition -> . NAME < NUMBER
+    (16) condition -> . NAME = NUMBER
+    (17) condition -> . NAME GE NUMBER
+    (18) condition -> . NAME LE NUMBER
+    (19) condition -> . NAME NE NUMBER
+    (20) condition -> . NAME > NAME
+    (21) condition -> . NAME < NAME
+    (22) condition -> . NAME = NAME
+    (23) condition -> . NAME GE NAME
+    (24) condition -> . NAME LE NAME
+    (25) condition -> . NAME NE NAME
+    (26) condition -> . list > list
+    (27) condition -> . list < list
+    (28) condition -> . list = list
+    (29) condition -> . list > NUMBER
+    (30) condition -> . list < NUMBER
+    (31) condition -> . list = NUMBER
+    (32) condition -> . NAME BETWEEN NUMBER AND NUMBER
+    (33) condition -> . NAME IN LP const_list RP
+    (34) list -> . *
+    (35) list -> . NAME
+    (36) list -> . NAME DOT NAME
+    (37) list -> . list COMMA list
 
-    NAME            shift and go to state 49
+    NAME            shift and go to state 25
     *               shift and go to state 7
 
-    condition                      shift and go to state 50
-    list                           shift and go to state 26
+    condition                      shift and go to state 49
+    list                           shift and go to state 22
 
-state 38
+state 34
 
-    (12) lst -> NAME BETWEEN . NUMBER AND NUMBER
+    (14) condition -> NAME > . NUMBER
+    (20) condition -> NAME > . NAME
 
     NUMBER          shift and go to state 51
+    NAME            shift and go to state 50
 
 
-state 39
+state 35
 
-    (13) condition -> NAME > . NUMBER
-    (16) condition -> NAME > . NAME
+    (15) condition -> NAME < . NUMBER
+    (21) condition -> NAME < . NAME
 
     NUMBER          shift and go to state 53
     NAME            shift and go to state 52
 
 
-state 40
+state 36
 
-    (14) condition -> NAME < . NUMBER
-    (17) condition -> NAME < . NAME
+    (16) condition -> NAME = . NUMBER
+    (22) condition -> NAME = . NAME
 
     NUMBER          shift and go to state 55
     NAME            shift and go to state 54
 
 
-state 41
+state 37
 
-    (15) condition -> NAME = . NUMBER
-    (18) condition -> NAME = . NAME
+    (17) condition -> NAME GE . NUMBER
+    (23) condition -> NAME GE . NAME
 
     NUMBER          shift and go to state 57
     NAME            shift and go to state 56
 
 
+state 38
+
+    (18) condition -> NAME LE . NUMBER
+    (24) condition -> NAME LE . NAME
+
+    NUMBER          shift and go to state 59
+    NAME            shift and go to state 58
+
+
+state 39
+
+    (19) condition -> NAME NE . NUMBER
+    (25) condition -> NAME NE . NAME
+
+    NUMBER          shift and go to state 61
+    NAME            shift and go to state 60
+
+
+state 40
+
+    (32) condition -> NAME BETWEEN . NUMBER AND NUMBER
+
+    NUMBER          shift and go to state 62
+
+
+state 41
+
+    (33) condition -> NAME IN . LP const_list RP
+
+    LP              shift and go to state 63
+
+
 state 42
 
-    (19) condition -> list > list .
-    (28) list -> list . COMMA list
-    (29) list -> list . AND NAME
-    (30) list -> list . OR NAME
+    (26) condition -> list > list .
+    (37) list -> list . COMMA list
 
-  ! shift/reduce conflict for AND resolved as shift
-  ! shift/reduce conflict for OR resolved as shift
-    $end            reduce using rule 19 (condition -> list > list .)
-    RP              reduce using rule 19 (condition -> list > list .)
+    AND             reduce using rule 26 (condition -> list > list .)
+    OR              reduce using rule 26 (condition -> list > list .)
+    $end            reduce using rule 26 (condition -> list > list .)
+    RP              reduce using rule 26 (condition -> list > list .)
     COMMA           shift and go to state 11
-    AND             shift and go to state 12
-    OR              shift and go to state 13
-
-  ! AND             [ reduce using rule 19 (condition -> list > list .) ]
-  ! OR              [ reduce using rule 19 (condition -> list > list .) ]
 
 
 state 43
 
-    (22) condition -> list > NUMBER .
+    (29) condition -> list > NUMBER .
 
-    AND             reduce using rule 22 (condition -> list > NUMBER .)
-    OR              reduce using rule 22 (condition -> list > NUMBER .)
-    $end            reduce using rule 22 (condition -> list > NUMBER .)
-    RP              reduce using rule 22 (condition -> list > NUMBER .)
+    AND             reduce using rule 29 (condition -> list > NUMBER .)
+    OR              reduce using rule 29 (condition -> list > NUMBER .)
+    $end            reduce using rule 29 (condition -> list > NUMBER .)
+    RP              reduce using rule 29 (condition -> list > NUMBER .)
 
 
 state 44
 
-    (20) condition -> list < list .
-    (28) list -> list . COMMA list
-    (29) list -> list . AND NAME
-    (30) list -> list . OR NAME
+    (27) condition -> list < list .
+    (37) list -> list . COMMA list
 
-  ! shift/reduce conflict for AND resolved as shift
-  ! shift/reduce conflict for OR resolved as shift
-    $end            reduce using rule 20 (condition -> list < list .)
-    RP              reduce using rule 20 (condition -> list < list .)
+    AND             reduce using rule 27 (condition -> list < list .)
+    OR              reduce using rule 27 (condition -> list < list .)
+    $end            reduce using rule 27 (condition -> list < list .)
+    RP              reduce using rule 27 (condition -> list < list .)
     COMMA           shift and go to state 11
-    AND             shift and go to state 12
-    OR              shift and go to state 13
-
-  ! AND             [ reduce using rule 20 (condition -> list < list .) ]
-  ! OR              [ reduce using rule 20 (condition -> list < list .) ]
 
 
 state 45
 
-    (23) condition -> list < NUMBER .
+    (30) condition -> list < NUMBER .
 
-    AND             reduce using rule 23 (condition -> list < NUMBER .)
-    OR              reduce using rule 23 (condition -> list < NUMBER .)
-    $end            reduce using rule 23 (condition -> list < NUMBER .)
-    RP              reduce using rule 23 (condition -> list < NUMBER .)
+    AND             reduce using rule 30 (condition -> list < NUMBER .)
+    OR              reduce using rule 30 (condition -> list < NUMBER .)
+    $end            reduce using rule 30 (condition -> list < NUMBER .)
+    RP              reduce using rule 30 (condition -> list < NUMBER .)
 
 
 state 46
 
-    (21) condition -> list = list .
-    (28) list -> list . COMMA list
-    (29) list -> list . AND NAME
-    (30) list -> list . OR NAME
+    (28) condition -> list = list .
+    (37) list -> list . COMMA list
 
-  ! shift/reduce conflict for AND resolved as shift
-  ! shift/reduce conflict for OR resolved as shift
-    $end            reduce using rule 21 (condition -> list = list .)
-    RP              reduce using rule 21 (condition -> list = list .)
+    AND             reduce using rule 28 (condition -> list = list .)
+    OR              reduce using rule 28 (condition -> list = list .)
+    $end            reduce using rule 28 (condition -> list = list .)
+    RP              reduce using rule 28 (condition -> list = list .)
     COMMA           shift and go to state 11
-    AND             shift and go to state 12
-    OR              shift and go to state 13
-
-  ! AND             [ reduce using rule 21 (condition -> list = list .) ]
-  ! OR              [ reduce using rule 21 (condition -> list = list .) ]
 
 
 state 47
 
-    (24) condition -> list = NUMBER .
+    (31) condition -> list = NUMBER .
 
-    AND             reduce using rule 24 (condition -> list = NUMBER .)
-    OR              reduce using rule 24 (condition -> list = NUMBER .)
-    $end            reduce using rule 24 (condition -> list = NUMBER .)
-    RP              reduce using rule 24 (condition -> list = NUMBER .)
+    AND             reduce using rule 31 (condition -> list = NUMBER .)
+    OR              reduce using rule 31 (condition -> list = NUMBER .)
+    $end            reduce using rule 31 (condition -> list = NUMBER .)
+    RP              reduce using rule 31 (condition -> list = NUMBER .)
 
 
 state 48
 
-    (10) lst -> condition AND condition .
+    (12) lst -> lst AND condition .
 
-    $end            reduce using rule 10 (lst -> condition AND condition .)
-    RP              reduce using rule 10 (lst -> condition AND condition .)
+    AND             reduce using rule 12 (lst -> lst AND condition .)
+    OR              reduce using rule 12 (lst -> lst AND condition .)
+    $end            reduce using rule 12 (lst -> lst AND condition .)
+    RP              reduce using rule 12 (lst -> lst AND condition .)
 
 
 state 49
 
-    (13) condition -> NAME . > NUMBER
-    (14) condition -> NAME . < NUMBER
-    (15) condition -> NAME . = NUMBER
-    (16) condition -> NAME . > NAME
-    (17) condition -> NAME . < NAME
-    (18) condition -> NAME . = NAME
-    (26) list -> NAME .
-    (27) list -> NAME . DOT NAME
+    (13) lst -> lst OR condition .
 
-  ! shift/reduce conflict for > resolved as shift
-  ! shift/reduce conflict for < resolved as shift
-  ! shift/reduce conflict for = resolved as shift
-    >               shift and go to state 39
-    <               shift and go to state 40
-    =               shift and go to state 41
-    COMMA           reduce using rule 26 (list -> NAME .)
-    AND             reduce using rule 26 (list -> NAME .)
-    OR              reduce using rule 26 (list -> NAME .)
-    DOT             shift and go to state 14
-
-  ! >               [ reduce using rule 26 (list -> NAME .) ]
-  ! <               [ reduce using rule 26 (list -> NAME .) ]
-  ! =               [ reduce using rule 26 (list -> NAME .) ]
+    AND             reduce using rule 13 (lst -> lst OR condition .)
+    OR              reduce using rule 13 (lst -> lst OR condition .)
+    $end            reduce using rule 13 (lst -> lst OR condition .)
+    RP              reduce using rule 13 (lst -> lst OR condition .)
 
 
 state 50
 
-    (11) lst -> condition OR condition .
+    (20) condition -> NAME > NAME .
 
-    $end            reduce using rule 11 (lst -> condition OR condition .)
-    RP              reduce using rule 11 (lst -> condition OR condition .)
+    AND             reduce using rule 20 (condition -> NAME > NAME .)
+    OR              reduce using rule 20 (condition -> NAME > NAME .)
+    $end            reduce using rule 20 (condition -> NAME > NAME .)
+    RP              reduce using rule 20 (condition -> NAME > NAME .)
 
 
 state 51
 
-    (12) lst -> NAME BETWEEN NUMBER . AND NUMBER
+    (14) condition -> NAME > NUMBER .
 
-    AND             shift and go to state 58
+    AND             reduce using rule 14 (condition -> NAME > NUMBER .)
+    OR              reduce using rule 14 (condition -> NAME > NUMBER .)
+    $end            reduce using rule 14 (condition -> NAME > NUMBER .)
+    RP              reduce using rule 14 (condition -> NAME > NUMBER .)
 
 
 state 52
 
-    (16) condition -> NAME > NAME .
+    (21) condition -> NAME < NAME .
 
-    AND             reduce using rule 16 (condition -> NAME > NAME .)
-    OR              reduce using rule 16 (condition -> NAME > NAME .)
-    $end            reduce using rule 16 (condition -> NAME > NAME .)
-    RP              reduce using rule 16 (condition -> NAME > NAME .)
+    AND             reduce using rule 21 (condition -> NAME < NAME .)
+    OR              reduce using rule 21 (condition -> NAME < NAME .)
+    $end            reduce using rule 21 (condition -> NAME < NAME .)
+    RP              reduce using rule 21 (condition -> NAME < NAME .)
 
 
 state 53
 
-    (13) condition -> NAME > NUMBER .
+    (15) condition -> NAME < NUMBER .
 
-    AND             reduce using rule 13 (condition -> NAME > NUMBER .)
-    OR              reduce using rule 13 (condition -> NAME > NUMBER .)
-    $end            reduce using rule 13 (condition -> NAME > NUMBER .)
-    RP              reduce using rule 13 (condition -> NAME > NUMBER .)
+    AND             reduce using rule 15 (condition -> NAME < NUMBER .)
+    OR              reduce using rule 15 (condition -> NAME < NUMBER .)
+    $end            reduce using rule 15 (condition -> NAME < NUMBER .)
+    RP              reduce using rule 15 (condition -> NAME < NUMBER .)
 
 
 state 54
 
-    (17) condition -> NAME < NAME .
+    (22) condition -> NAME = NAME .
 
-    AND             reduce using rule 17 (condition -> NAME < NAME .)
-    OR              reduce using rule 17 (condition -> NAME < NAME .)
-    $end            reduce using rule 17 (condition -> NAME < NAME .)
-    RP              reduce using rule 17 (condition -> NAME < NAME .)
+    AND             reduce using rule 22 (condition -> NAME = NAME .)
+    OR              reduce using rule 22 (condition -> NAME = NAME .)
+    $end            reduce using rule 22 (condition -> NAME = NAME .)
+    RP              reduce using rule 22 (condition -> NAME = NAME .)
 
 
 state 55
 
-    (14) condition -> NAME < NUMBER .
+    (16) condition -> NAME = NUMBER .
 
-    AND             reduce using rule 14 (condition -> NAME < NUMBER .)
-    OR              reduce using rule 14 (condition -> NAME < NUMBER .)
-    $end            reduce using rule 14 (condition -> NAME < NUMBER .)
-    RP              reduce using rule 14 (condition -> NAME < NUMBER .)
+    AND             reduce using rule 16 (condition -> NAME = NUMBER .)
+    OR              reduce using rule 16 (condition -> NAME = NUMBER .)
+    $end            reduce using rule 16 (condition -> NAME = NUMBER .)
+    RP              reduce using rule 16 (condition -> NAME = NUMBER .)
 
 
 state 56
 
-    (18) condition -> NAME = NAME .
+    (23) condition -> NAME GE NAME .
 
-    AND             reduce using rule 18 (condition -> NAME = NAME .)
-    OR              reduce using rule 18 (condition -> NAME = NAME .)
-    $end            reduce using rule 18 (condition -> NAME = NAME .)
-    RP              reduce using rule 18 (condition -> NAME = NAME .)
+    AND             reduce using rule 23 (condition -> NAME GE NAME .)
+    OR              reduce using rule 23 (condition -> NAME GE NAME .)
+    $end            reduce using rule 23 (condition -> NAME GE NAME .)
+    RP              reduce using rule 23 (condition -> NAME GE NAME .)
 
 
 state 57
 
-    (15) condition -> NAME = NUMBER .
+    (17) condition -> NAME GE NUMBER .
 
-    AND             reduce using rule 15 (condition -> NAME = NUMBER .)
-    OR              reduce using rule 15 (condition -> NAME = NUMBER .)
-    $end            reduce using rule 15 (condition -> NAME = NUMBER .)
-    RP              reduce using rule 15 (condition -> NAME = NUMBER .)
+    AND             reduce using rule 17 (condition -> NAME GE NUMBER .)
+    OR              reduce using rule 17 (condition -> NAME GE NUMBER .)
+    $end            reduce using rule 17 (condition -> NAME GE NUMBER .)
+    RP              reduce using rule 17 (condition -> NAME GE NUMBER .)
 
 
 state 58
 
-    (12) lst -> NAME BETWEEN NUMBER AND . NUMBER
+    (24) condition -> NAME LE NAME .
 
-    NUMBER          shift and go to state 59
+    AND             reduce using rule 24 (condition -> NAME LE NAME .)
+    OR              reduce using rule 24 (condition -> NAME LE NAME .)
+    $end            reduce using rule 24 (condition -> NAME LE NAME .)
+    RP              reduce using rule 24 (condition -> NAME LE NAME .)
 
 
 state 59
 
-    (12) lst -> NAME BETWEEN NUMBER AND NUMBER .
+    (18) condition -> NAME LE NUMBER .
 
-    $end            reduce using rule 12 (lst -> NAME BETWEEN NUMBER AND NUMBER .)
-    RP              reduce using rule 12 (lst -> NAME BETWEEN NUMBER AND NUMBER .)
+    AND             reduce using rule 18 (condition -> NAME LE NUMBER .)
+    OR              reduce using rule 18 (condition -> NAME LE NUMBER .)
+    $end            reduce using rule 18 (condition -> NAME LE NUMBER .)
+    RP              reduce using rule 18 (condition -> NAME LE NUMBER .)
+
+
+state 60
+
+    (25) condition -> NAME NE NAME .
+
+    AND             reduce using rule 25 (condition -> NAME NE NAME .)
+    OR              reduce using rule 25 (condition -> NAME NE NAME .)
+    $end            reduce using rule 25 (condition -> NAME NE NAME .)
+    RP              reduce using rule 25 (condition -> NAME NE NAME .)
+
+
+state 61
+
+    (19) condition -> NAME NE NUMBER .
+
+    AND             reduce using rule 19 (condition -> NAME NE NUMBER .)
+    OR              reduce using rule 19 (condition -> NAME NE NUMBER .)
+    $end            reduce using rule 19 (condition -> NAME NE NUMBER .)
+    RP              reduce using rule 19 (condition -> NAME NE NUMBER .)
+
+
+state 62
+
+    (32) condition -> NAME BETWEEN NUMBER . AND NUMBER
+
+    AND             shift and go to state 64
+
+
+state 63
+
+    (33) condition -> NAME IN LP . const_list RP
+    (9) const_list -> . const_list COMMA NUMBER
+    (10) const_list -> . NUMBER
+
+    NUMBER          shift and go to state 66
+
+    const_list                     shift and go to state 65
+
+state 64
+
+    (32) condition -> NAME BETWEEN NUMBER AND . NUMBER
+
+    NUMBER          shift and go to state 67
+
+
+state 65
+
+    (33) condition -> NAME IN LP const_list . RP
+    (9) const_list -> const_list . COMMA NUMBER
+
+    RP              shift and go to state 68
+    COMMA           shift and go to state 69
+
+
+state 66
+
+    (10) const_list -> NUMBER .
+
+    RP              reduce using rule 10 (const_list -> NUMBER .)
+    COMMA           reduce using rule 10 (const_list -> NUMBER .)
+
+
+state 67
+
+    (32) condition -> NAME BETWEEN NUMBER AND NUMBER .
+
+    AND             reduce using rule 32 (condition -> NAME BETWEEN NUMBER AND NUMBER .)
+    OR              reduce using rule 32 (condition -> NAME BETWEEN NUMBER AND NUMBER .)
+    $end            reduce using rule 32 (condition -> NAME BETWEEN NUMBER AND NUMBER .)
+    RP              reduce using rule 32 (condition -> NAME BETWEEN NUMBER AND NUMBER .)
+
+
+state 68
+
+    (33) condition -> NAME IN LP const_list RP .
+
+    AND             reduce using rule 33 (condition -> NAME IN LP const_list RP .)
+    OR              reduce using rule 33 (condition -> NAME IN LP const_list RP .)
+    $end            reduce using rule 33 (condition -> NAME IN LP const_list RP .)
+    RP              reduce using rule 33 (condition -> NAME IN LP const_list RP .)
+
+
+state 69
+
+    (9) const_list -> const_list COMMA . NUMBER
+
+    NUMBER          shift and go to state 70
+
+
+state 70
+
+    (9) const_list -> const_list COMMA NUMBER .
+
+    RP              reduce using rule 9 (const_list -> const_list COMMA NUMBER .)
+    COMMA           reduce using rule 9 (const_list -> const_list COMMA NUMBER .)
 
 WARNING: 
 WARNING: Conflicts:
 WARNING: 
-WARNING: shift/reduce conflict for AS in state 16 resolved as shift
-WARNING: shift/reduce conflict for COMMA in state 18 resolved as shift
-WARNING: shift/reduce conflict for AND in state 18 resolved as shift
-WARNING: shift/reduce conflict for OR in state 18 resolved as shift
-WARNING: shift/reduce conflict for > in state 29 resolved as shift
-WARNING: shift/reduce conflict for < in state 29 resolved as shift
-WARNING: shift/reduce conflict for = in state 29 resolved as shift
-WARNING: shift/reduce conflict for AND in state 42 resolved as shift
-WARNING: shift/reduce conflict for OR in state 42 resolved as shift
-WARNING: shift/reduce conflict for AND in state 44 resolved as shift
-WARNING: shift/reduce conflict for OR in state 44 resolved as shift
-WARNING: shift/reduce conflict for AND in state 46 resolved as shift
-WARNING: shift/reduce conflict for OR in state 46 resolved as shift
-WARNING: shift/reduce conflict for > in state 49 resolved as shift
-WARNING: shift/reduce conflict for < in state 49 resolved as shift
-WARNING: shift/reduce conflict for = in state 49 resolved as shift
+WARNING: shift/reduce conflict for AS in state 14 resolved as shift
+WARNING: shift/reduce conflict for COMMA in state 16 resolved as shift
+WARNING: shift/reduce conflict for > in state 25 resolved as shift
+WARNING: shift/reduce conflict for < in state 25 resolved as shift
+WARNING: shift/reduce conflict for = in state 25 resolved as shift

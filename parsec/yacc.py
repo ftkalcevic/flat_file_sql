@@ -9,12 +9,33 @@ from node import node
 import common
 
 
+keywords=('SELECT','FROM','WHERE','AND','OR','BETWEEN','IN','AS')
 #TOKENS
-tokens=('SELECT','FROM','WHERE','NAME','AND','OR','COMMA',
-'LP','RP','BETWEEN','NUMBER','AS','DOT')
+tokens=keywords + ('NAME','COMMA','LP','RP','NUMBER','DOT', 'GE', 'LE', 'NE' )
   
+
 literals = ['=','+','-','*', '^','>','<' ] 
 #DEFINE OF TOKENS
+
+def t_NAME(t):
+    #r'[A-Za-z]+|[a-zA-Z_][a-zA-Z0-9_]*|[A-Z]*\.[A-Z]$'
+    r'[a-zA-Z_][a-zA-Z0-9_.[*\]]*'
+    if t.value.upper() in keywords:
+        t.type = t.value.upper()
+    return t
+
+def t_GE(t):
+    r'\>\='
+    return t
+
+def t_LE(t):
+    r'\<\='
+    return t
+
+def t_NE(t):
+    r'\<\>'
+    return t
+
 def t_LP(t):
     r'\('
     return t
@@ -33,6 +54,10 @@ def t_RP(t):
 
 def t_BETWEEN(t):
     r'BETWEEN'
+    return t
+
+def t_IN(t):
+    r'IN'
     return t
 
 def t_SELECT(t):
@@ -63,11 +88,6 @@ def t_NUMBER(t):
     r'[0-9]+'
     return t
 
-def t_NAME(t):
-    #r'[A-Za-z]+|[a-zA-Z_][a-zA-Z0-9_]*|[A-Z]*\.[A-Z]$'
-    r'[a-zA-Z_][a-zA-Z0-9_.[*\]]*'
-    return t
-
 # IGNORED
 t_ignore = " \t\n"
 
@@ -76,7 +96,7 @@ def t_error(t):
     t.lexer.skip(1)
 
 # LEX ANALYSIS   
-lex.lex(reflags=re.IGNORECASE)
+lex.lex(reflags=re.IGNORECASE+re.VERBOSE)
 
 #PARSING
 def p_query(t):
@@ -93,18 +113,23 @@ def p_select(t):
                 | SELECT list FROM table '''
     if len(t)==7:
         t[0]=node('[QUERY]')
-        t[0].add(node('[SELECT]'))
-        t[0].add(t[2])
-        t[0].add(node('[FROM]'))
-        t[0].add(t[4])
-        t[0].add(node('[WHERE]'))
-        t[0].add(t[6])
+        s = node('[SELECT]')
+        t[0].add(s)
+        s.add(t[2])
+        f = node('[FROM]')
+        t[0].add(f)
+        f.add(t[4])
+        w = node('[WHERE]')
+        t[0].add(w)
+        w.add(t[6])
     else:
         t[0]=node('QUERY')
-        t[0].add(node('[SELECT]'))
-        t[0].add(t[2])
-        t[0].add(node('[FROM]'))
-        t[0].add(t[4])
+        s = node('[SELECT]')
+        t[0].add(s)
+        s.add(t[2])
+        f = node('[FROM]')
+        t[0].add(f)
+        f.add(t[4])
 
 def p_table(t):
     '''table : NAME
@@ -128,12 +153,21 @@ def p_table(t):
         t[0]=node('[TABLE]')
         t[0].add(t[2])
         
+def p_const_list(t):
+    ''' const_list  : const_list COMMA NUMBER
+                    | NUMBER
+                    '''
+    if len(t)==2:
+        t[0] = node("[NUMBER_LIST]")
+        t[0].add( t[1] )
+    else:
+        t[0] = t[1]
+        t[0].add( t[3] )
 
 def p_lst(t):
     ''' lst  : condition
-             | condition AND condition
-             | condition OR condition
-             | NAME BETWEEN NUMBER AND NUMBER
+             | lst AND condition
+             | lst OR condition
               '''
     
     if len(t)==2:
@@ -149,11 +183,6 @@ def p_lst(t):
         t[0].add(t[1])
         t[0].add(node('[OR]'))
         t[0].add(t[3])
-    elif t[2].upper()=='BETWEEN':
-        temp='%s >= %s & %s <= %s'%(t[1],str(t[3]),t[1],str(t[5]))
-        t[0]=node('[CONDITION]')
-        t[0].add(node('[TERM]'))
-        t[0].add(node(temp))
     else:
         t[0]=node('')
         
@@ -162,37 +191,65 @@ def p_condition(t):
     ''' condition : NAME '>' NUMBER
                   | NAME '<' NUMBER
                   | NAME '=' NUMBER
+                  | NAME GE NUMBER
+                  | NAME LE NUMBER
+                  | NAME NE NUMBER
                   | NAME '>' NAME
                   | NAME '<' NAME
                   | NAME '=' NAME
+                  | NAME GE NAME
+                  | NAME LE NAME
+                  | NAME NE NAME
                   | list '>' list
                   | list '<' list
                   | list '=' list
                   | list '>' NUMBER
                   | list '<' NUMBER
-                  | list '=' NUMBER  '''
+                  | list '=' NUMBER  
+                  | NAME BETWEEN NUMBER AND NUMBER
+                  | NAME IN LP const_list RP
+                  '''
     t[0]=node('[TERM]')
-    if isinstance(t[1], node) :
-        t[0].add(t[1])
-    else :
+    if len(t) == 4:
         t[0].add(node(str(t[1])))
         t[0].add(node(t[2]))
-    if isinstance(t[3], node) :
-        t[0].add(t[3])
-    else :
         t[0].add(node(str(t[3])))
+    elif t[2].upper()=='BETWEEN':
+        temp='%s >= %s & %s <= %s'%(t[1],str(t[3]),t[1],str(t[5]))
+        t[0]=node('[CONDITION]')
+        t[0].add(node('[TERM]'))
+        t[0].add(node(temp))
+    elif t[2].upper()=='IN':
+        t[0]=node('[CONDITION]')
+        t[0].add(node(t[1]))
+        t[0].add(node('[IN]'))
+        t[0].add(node(t[4].getchildren()))
+    #elif t[2]=='<' and len(t)==4:
+    #    temp='%s < %s'%(str(t[1]),str(t[3]))
+    #    t[0]=node('[CONDITION]')
+    #    t[0].add(node('[TERM]'))
+    #    t[0].add(node(temp))
+    #elif t[2]=='=' and len(t)==4:
+    #    temp='%s = %s'%(str(t[1]),str(t[3]))
+    #    t[0]=node('[CONDITION]')
+    #    t[0].add(node('[TERM]'))
+    #    t[0].add(node(temp))
+    #elif t[2]=='>' and len(t)==4:
+    #    temp='%s > %s'%(str(t[1]),str(t[3]))
+    #    t[0]=node('[CONDITION]')
+    #    t[0].add(node('[TERM]'))
+    #    t[0].add(node(temp))
+    #else:
+    #    t[0].add(node(str(t[3])))
 
 def p_list(t):
     ''' list : '*'
              | NAME
              | NAME DOT NAME 
              | list COMMA list
-             | list AND NAME
-             | list OR NAME
              '''
     if len(t)==2:
-        t[0]=node('[FIELD]')
-        t[0].add(node(t[1]))
+        t[0]=node(t[1])
     elif t[2]==',':
         t[0]=node('[FIELDS]')
         t[0].add(t[1])
@@ -211,7 +268,7 @@ yacc.yacc()
 class Sql:
 
     def __init__(self, query):
-        self.parse=yacc.parse(query)
+        self.parse=yacc.parse(query,debug=True)
         if common.doLog:
             self.parse.print_node(0)
 
