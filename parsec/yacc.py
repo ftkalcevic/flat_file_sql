@@ -171,17 +171,14 @@ def p_lst(t):
               '''
     
     if len(t)==2:
-        t[0]=node('[CONDITION]')
-        t[0].add(t[1])
+        t[0]=t[1]
     elif t[2].upper()=='AND':
-        t[0]=node('[CONDITIONS]')
+        t[0]=node('[AND]')
         t[0].add(t[1])
-        t[0].add(node('[AND]'))
         t[0].add(t[3])
     elif t[2].upper()=='OR':
-        t[0]=node('[CONDITIONS]')
+        t[0]=node('[OR]')
         t[0].add(t[1])
-        t[0].add(node('[OR]'))
         t[0].add(t[3])
     else:
         t[0]=node('')
@@ -209,20 +206,19 @@ def p_condition(t):
                   | NAME BETWEEN NUMBER AND NUMBER
                   | NAME IN LP const_list RP
                   '''
-    t[0]=node('[TERM]')
     if len(t) == 4:
+        t[0]=node(t[2])
         t[0].add(node(str(t[1])))
-        t[0].add(node(t[2]))
         t[0].add(node(str(t[3])))
     elif t[2].upper()=='BETWEEN':
         temp='%s >= %s & %s <= %s'%(t[1],str(t[3]),t[1],str(t[5]))
-        t[0]=node('[CONDITION]')
-        t[0].add(node('[TERM]'))
-        t[0].add(node(temp))
-    elif t[2].upper()=='IN':
-        t[0]=node('[CONDITION]')
+        t[0]=node('[BETWEEN]')
         t[0].add(node(t[1]))
-        t[0].add(node('[IN]'))
+        t[0].add(node(t[3]))
+        t[0].add(node(t[5]))
+    elif t[2].upper()=='IN':
+        t[0]=node('[IN]')
+        t[0].add(node(t[1]))
         t[0].add(node(t[4].getchildren()))
     #elif t[2]=='<' and len(t)==4:
     #    temp='%s < %s'%(str(t[1]),str(t[3]))
@@ -249,15 +245,18 @@ def p_list(t):
              | list COMMA list
              '''
     if len(t)==2:
-        t[0]=node(t[1])
-    elif t[2]==',':
         t[0]=node('[FIELDS]')
-        t[0].add(t[1])
-        t[0].add(t[3])
+        t[0].add(node(t[1]))
+    elif t[2]==',':
+        n = node('[FIELDS]')
+        for c in t[1].getchildren():
+            n.add( c )
+        for c in t[3].getchildren():
+            n.add( c )        
+        t[0] = n
     else:
         temp='%s.%s'%(t[1],t[3])
-        t[0]=node('[FIELD]')
-        t[0].add(node(temp))
+        t[0]=node(temp)
     
 def p_error(t):
     print("Syntax error at pos "+str(t.lexpos)+" - '"+t.value+"'" )

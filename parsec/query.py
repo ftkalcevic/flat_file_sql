@@ -134,13 +134,9 @@ def executeQuery(structName, t, fields, where):
 
 
 def findQueryColumns(node):
-    if node.getdata() == "[FIELD]":
-        return [node.getchildren()[0].getdata()]
-    else:
-        lst = []
-        for c in node.getchildren():
-            lst.extend( findQueryColumns(c) )
-        return lst
+    if node.getdata() == "[FIELDS]":
+        return [o.getdata() for o in node.getchildren()]
+    return []
 
 
 if __name__ == "__main__":
