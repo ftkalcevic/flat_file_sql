@@ -21,3 +21,5 @@ select * from MY_SIMPLE where simp2 > 7
 arrays (including arrays of structures) are supported.
 
 No joins.
+
+LIKE expressions use Regex expression.

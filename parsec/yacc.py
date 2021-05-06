@@ -9,7 +9,7 @@ from node import node
 import common
 
 
-keywords=('SELECT','FROM','WHERE','AND','OR','BETWEEN','IN','AS')
+keywords=('SELECT','FROM','WHERE','AND','OR','BETWEEN','IN','AS', 'LIKE')
 #TOKENS
 tokens=keywords + ('NAME','COMMA','LP','RP','NUMBER', 'STRING', 'DOT', 'GE', 'LE', 'NE' )
   
@@ -46,6 +46,10 @@ def t_DOT(t):
 
 def t_AS(t):
     r'AS'
+    return t
+
+def t_LIKE(t):
+    r'LIKE'
     return t
 
 def t_RP(t):
@@ -85,7 +89,7 @@ def t_COMMA(t):
     return t
 
 def t_NUMBER(t):
-    r'[0-9]+'
+    r'[+-]?([0-9]*[.])?[0-9]+'
     return t
 
 def t_STRING(t):
@@ -222,6 +226,7 @@ def p_condition(t):
                   | NAME BETWEEN NUMBER AND NUMBER
                   | NAME IN LP const_list RP
                   | NAME IN LP string_list RP
+                  | NAME LIKE STRING
                   '''
     if len(t) == 4:
         t[0]=node(t[2])

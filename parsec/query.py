@@ -2,6 +2,7 @@ import copy
 import sys
 import io
 import struct
+import re
 
 from pathlib import Path
 from parsec import StructParser
@@ -18,6 +19,13 @@ order = 'little'
 
 class QueryException(Exception):
     pass
+
+def is_float(value):
+    try:
+        float(value)
+        return True
+    except:
+        return False
 
 class WhereNode:
     def __init__(self, clause, t):
@@ -41,6 +49,7 @@ class InWhereNode(WhereNode):
         self.type = clause.getdata()
         self.value = ValueWhereNode( clause.getchildren()[0], t)
         self.values = clause.getchildren()[1].getdata()
+        # todo check types
 
     def match(self, buf):
         lvalue = self.value.evaluate(buf)
@@ -55,6 +64,7 @@ class BetweenWhereNode(WhereNode):
         self.value = ValueWhereNode(clause.getchildren()[0],t)
         self.min = ValueWhereNode( clause.getchildren()[1], t)
         self.max = ValueWhereNode( clause.getchildren()[2], t)
+        # todo check types
 
     def match(self, buf):
         min = self.min.evaluate(buf)
@@ -69,12 +79,12 @@ class ValueWhereNode(WhereNode):
 
     def __init__(self, clause, t):
         s = clause.getdata()
-        if s.isnumeric():
+        if is_float(s):
             self.type = ValueWhereNode.NUM
-            if "." in clause.getdata():
-                self.value = float(clause.getdata())
-            else:
+            if s.isnumeric():
                 self.value = int(clause.getdata())
+            else:
+                self.value = float(clause.getdata())
         elif s[0] == "'" and s[-1] == "'":
             self.type = ValueWhereNode.STR
             self.value = s[1:-1]
@@ -83,6 +93,18 @@ class ValueWhereNode(WhereNode):
             self.value = t.findField(s)
             if len(self.value) == 0:
                 raise QueryException("Unknown field '{0}' in where clause".format(s))
+
+    def getdatatype(self):
+        if self.type == ValueWhereNode.NUM:
+            return self.type
+        elif self.type == ValueWhereNode.STR:
+            return self.type
+        else:
+            t = self.value[0].ctype
+            if t.dataType == "char" and t.arraySize > 0:
+                return ValueWhereNode.STR
+            else:
+                return ValueWhereNode.NUM
 
     def evaluate(self, buf):
         if self.type == ValueWhereNode.NUM or self.type == ValueWhereNode.STR:
@@ -98,6 +120,12 @@ class LogicalWhereNode(WhereNode):
         self.children = []
         self.children.append( ValueWhereNode( clause.getchildren()[0], t ))
         self.children.append( ValueWhereNode( clause.getchildren()[1], t ))
+        type1 = self.children[0].getdatatype()
+        type2 = self.children[1].getdatatype()
+        if type1 != type2:
+            raise QueryException("comparing string and number in where clause '{0}{1}{2}'".format(clause.getchildren()[0].getdata(), clause.getdata(), clause.getchildren()[1].getdata()))
+        if self.expr.upper() == "LIKE":
+            self.rex = re.compile(clause.getchildren()[1].getdata().upper())
 
     def match(self, buf):
         lvalue = self.children[0].evaluate(buf)
@@ -117,7 +145,10 @@ class LogicalWhereNode(WhereNode):
             return lvalue <= rvalue
         elif self.expr == ">=":
             return lvalue >= rvalue
-            
+        elif self.expr.upper() == "LIKE":
+            return re.match( self.rex, lvalue )
+        else:
+            raise QueryException("Unknown boolean compartor '{0}'".format(self.expr))
 
 class ConditionalWhereNode(WhereNode):
     def __init__(self, clause, t):
@@ -283,7 +314,7 @@ if __name__ == "__main__":
         #sql = Sql("Select index, mi, why.* from MY_STRUCT where index in (1,3,5)")
         #sql = Sql("Select index, mi, why.*, str from MY_STRUCT where str in ('a', 'test')")
         #sql = Sql("Select index, mi, why.*, str from MY_STRUCT where index between 2 and 3")
-        sql = Sql("Select index, mi, why2[*].*, str from MY_STRUCT where index between 2 and 3")
+        sql = Sql("Select index, mi, why2[*].*, str from MY_STRUCT where str like 't.*'")
 
         node = sql.findNode( "[TABLE]" )
 
