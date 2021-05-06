@@ -11,7 +11,7 @@ import common
 
 keywords=('SELECT','FROM','WHERE','AND','OR','BETWEEN','IN','AS')
 #TOKENS
-tokens=keywords + ('NAME','COMMA','LP','RP','NUMBER','DOT', 'GE', 'LE', 'NE' )
+tokens=keywords + ('NAME','COMMA','LP','RP','NUMBER', 'STRING', 'DOT', 'GE', 'LE', 'NE' )
   
 
 literals = ['=','+','-','*', '^','>','<' ] 
@@ -33,7 +33,7 @@ def t_LE(t):
     return t
 
 def t_NE(t):
-    r'\<\>'
+    r'\<\>|\!\='
     return t
 
 def t_LP(t):
@@ -86,6 +86,10 @@ def t_COMMA(t):
 
 def t_NUMBER(t):
     r'[0-9]+'
+    return t
+
+def t_STRING(t):
+    r'\'[^\']*\''
     return t
 
 # IGNORED
@@ -164,6 +168,17 @@ def p_const_list(t):
         t[0] = t[1]
         t[0].add( t[3] )
 
+def p_string_list(t):
+    ''' string_list  : string_list COMMA STRING
+                     | STRING
+                     '''
+    if len(t)==2:
+        t[0] = node("[STRING_LIST]")
+        t[0].add( t[1] )
+    else:
+        t[0] = t[1]
+        t[0].add( t[3] )
+
 def p_lst(t):
     ''' lst  : condition
              | lst AND condition
@@ -188,6 +203,7 @@ def p_condition(t):
     ''' condition : NAME '>' NUMBER
                   | NAME '<' NUMBER
                   | NAME '=' NUMBER
+                  | NAME '=' STRING
                   | NAME GE NUMBER
                   | NAME LE NUMBER
                   | NAME NE NUMBER
@@ -205,6 +221,7 @@ def p_condition(t):
                   | list '=' NUMBER  
                   | NAME BETWEEN NUMBER AND NUMBER
                   | NAME IN LP const_list RP
+                  | NAME IN LP string_list RP
                   '''
     if len(t) == 4:
         t[0]=node(t[2])
@@ -219,24 +236,12 @@ def p_condition(t):
     elif t[2].upper()=='IN':
         t[0]=node('[IN]')
         t[0].add(node(t[1]))
-        t[0].add(node(t[4].getchildren()))
-    #elif t[2]=='<' and len(t)==4:
-    #    temp='%s < %s'%(str(t[1]),str(t[3]))
-    #    t[0]=node('[CONDITION]')
-    #    t[0].add(node('[TERM]'))
-    #    t[0].add(node(temp))
-    #elif t[2]=='=' and len(t)==4:
-    #    temp='%s = %s'%(str(t[1]),str(t[3]))
-    #    t[0]=node('[CONDITION]')
-    #    t[0].add(node('[TERM]'))
-    #    t[0].add(node(temp))
-    #elif t[2]=='>' and len(t)==4:
-    #    temp='%s > %s'%(str(t[1]),str(t[3]))
-    #    t[0]=node('[CONDITION]')
-    #    t[0].add(node('[TERM]'))
-    #    t[0].add(node(temp))
-    #else:
-    #    t[0].add(node(str(t[3])))
+        if t[4].getdata() == '[NUMBER_LIST]':
+            l = [int(x) for x in t[4].getchildren()]
+            t[0].add(node(l))
+        else:
+            l = [x.upper() for x in t[4].getchildren()]
+            t[0].add(node(l))
 
 def p_list(t):
     ''' list : '*'
@@ -267,7 +272,7 @@ yacc.yacc()
 class Sql:
 
     def __init__(self, query):
-        self.parse=yacc.parse(query,debug=True)
+        self.parse=yacc.parse(query,debug=common.doLog)
         if common.doLog:
             self.parse.print_node(0)
 

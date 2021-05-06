@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = "AND AS BETWEEN COMMA DOT FROM GE IN LE LP NAME NE NUMBER OR RP SELECT WHEREquery :  select \n            | LP query RP\n                select :   SELECT list FROM table WHERE lst\n                | SELECT list FROM table table : NAME\n            | LP query RP\n            | NAME AS NAME\n            | table AS NAME const_list  : const_list COMMA NUMBER\n                    | NUMBER\n                     lst  : condition\n             | lst AND condition\n             | lst OR condition\n               condition : NAME '>' NUMBER\n                  | NAME '<' NUMBER\n                  | NAME '=' NUMBER\n                  | NAME GE NUMBER\n                  | NAME LE NUMBER\n                  | NAME NE NUMBER\n                  | NAME '>' NAME\n                  | NAME '<' NAME\n                  | NAME '=' NAME\n                  | NAME GE NAME\n                  | NAME LE NAME\n                  | NAME NE NAME\n                  | list '>' list\n                  | list '<' list\n                  | list '=' list\n                  | list '>' NUMBER\n                  | list '<' NUMBER\n                  | list '=' NUMBER  \n                  | NAME BETWEEN NUMBER AND NUMBER\n                  | NAME IN LP const_list RP\n                   list : '*'\n             | NAME\n             | NAME DOT NAME \n             | list COMMA list\n             "
+_lr_signature = "AND AS BETWEEN COMMA DOT FROM GE IN LE LP NAME NE NUMBER OR RP SELECT STRING WHEREquery :  select \n            | LP query RP\n                select :   SELECT list FROM table WHERE lst\n                | SELECT list FROM table table : NAME\n            | LP query RP\n            | NAME AS NAME\n            | table AS NAME const_list  : const_list COMMA NUMBER\n                    | NUMBER\n                     string_list  : string_list COMMA STRING\n                     | STRING\n                      lst  : condition\n             | lst AND condition\n             | lst OR condition\n               condition : NAME '>' NUMBER\n                  | NAME '<' NUMBER\n                  | NAME '=' NUMBER\n                  | NAME '=' STRING\n                  | NAME GE NUMBER\n                  | NAME LE NUMBER\n                  | NAME NE NUMBER\n                  | NAME '>' NAME\n                  | NAME '<' NAME\n                  | NAME '=' NAME\n                  | NAME GE NAME\n                  | NAME LE NAME\n                  | NAME NE NAME\n                  | list '>' list\n                  | list '<' list\n                  | list '=' list\n                  | list '>' NUMBER\n                  | list '<' NUMBER\n                  | list '=' NUMBER  \n                  | NAME BETWEEN NUMBER AND NUMBER\n                  | NAME IN LP const_list RP\n                  | NAME IN LP string_list RP\n                   list : '*'\n             | NAME\n             | NAME DOT NAME \n             | list COMMA list\n             "
     
-_lr_action_items = {'LP':([0,3,10,15,41,],[3,3,15,3,63,]),'SELECT':([0,3,15,],[4,4,4,]),'$end':([1,2,7,8,9,13,14,16,17,23,24,26,27,28,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,67,68,],[0,-1,-34,-35,-2,-4,-5,-37,-36,-3,-11,-8,-7,-6,-26,-29,-27,-30,-28,-31,-12,-13,-20,-14,-21,-15,-22,-16,-23,-17,-24,-18,-25,-19,-32,-33,]),'RP':([2,5,7,8,9,13,14,16,17,21,23,24,26,27,28,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,65,66,67,68,70,],[-1,9,-34,-35,-2,-4,-5,-37,-36,28,-3,-11,-8,-7,-6,-26,-29,-27,-30,-28,-31,-12,-13,-20,-14,-21,-15,-22,-16,-23,-17,-24,-18,-25,-19,68,-10,-32,-33,-9,]),'*':([4,11,18,29,30,31,32,33,],[7,7,7,7,7,7,7,7,]),'NAME':([4,10,11,12,18,19,20,29,30,31,32,33,34,35,36,37,38,39,],[8,14,8,17,25,26,27,8,8,8,25,25,50,52,54,56,58,60,]),'FROM':([6,7,8,16,17,],[10,-34,-35,-37,-36,]),'COMMA':([6,7,8,16,17,22,25,42,44,46,65,66,70,],[11,-34,-35,11,-36,11,-35,11,11,11,69,-10,-9,]),'>':([7,8,16,17,22,25,],[-34,-35,-37,-36,29,34,]),'<':([7,8,16,17,22,25,],[-34,-35,-37,-36,30,35,]),'=':([7,8,16,17,22,25,],[-34,-35,-37,-36,31,36,]),'AND':([7,8,16,17,23,24,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,67,68,],[-34,-35,-37,-36,32,-11,-26,-29,-27,-30,-28,-31,-12,-13,-20,-14,-21,-15,-22,-16,-23,-17,-24,-18,-25,-19,64,-32,-33,]),'OR':([7,8,16,17,23,24,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,67,68,],[-34,-35,-37,-36,33,-11,-26,-29,-27,-30,-28,-31,-12,-13,-20,-14,-21,-15,-22,-16,-23,-17,-24,-18,-25,-19,-32,-33,]),'DOT':([8,25,],[12,12,]),'WHERE':([13,14,26,27,28,],[18,-5,-8,-7,-6,]),'AS':([13,14,26,27,28,],[19,20,-8,-7,-6,]),'GE':([25,],[37,]),'LE':([25,],[38,]),'NE':([25,],[39,]),'BETWEEN':([25,],[40,]),'IN':([25,],[41,]),'NUMBER':([29,30,31,34,35,36,37,38,39,40,63,64,69,],[43,45,47,51,53,55,57,59,61,62,66,67,70,]),}
+_lr_action_items = {'LP':([0,3,10,15,41,],[3,3,15,3,64,]),'SELECT':([0,3,15,],[4,4,4,]),'$end':([1,2,7,8,9,13,14,16,17,23,24,26,27,28,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,70,71,73,],[0,-1,-38,-39,-2,-4,-5,-41,-40,-3,-13,-8,-7,-6,-29,-32,-30,-33,-31,-34,-14,-15,-23,-16,-24,-17,-25,-18,-19,-26,-20,-27,-21,-28,-22,-35,-36,-37,]),'RP':([2,5,7,8,9,13,14,16,17,21,23,24,26,27,28,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,66,67,68,69,70,71,73,75,76,],[-1,9,-38,-39,-2,-4,-5,-41,-40,28,-3,-13,-8,-7,-6,-29,-32,-30,-33,-31,-34,-14,-15,-23,-16,-24,-17,-25,-18,-19,-26,-20,-27,-21,-28,-22,71,73,-10,-12,-35,-36,-37,-9,-11,]),'*':([4,11,18,29,30,31,32,33,],[7,7,7,7,7,7,7,7,]),'NAME':([4,10,11,12,18,19,20,29,30,31,32,33,34,35,36,37,38,39,],[8,14,8,17,25,26,27,8,8,8,25,25,50,52,54,57,59,61,]),'FROM':([6,7,8,16,17,],[10,-38,-39,-41,-40,]),'COMMA':([6,7,8,16,17,22,25,42,44,46,66,67,68,69,75,76,],[11,-38,-39,11,-40,11,-39,11,11,11,72,74,-10,-12,-9,-11,]),'>':([7,8,16,17,22,25,],[-38,-39,-41,-40,29,34,]),'<':([7,8,16,17,22,25,],[-38,-39,-41,-40,30,35,]),'=':([7,8,16,17,22,25,],[-38,-39,-41,-40,31,36,]),'AND':([7,8,16,17,23,24,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,70,71,73,],[-38,-39,-41,-40,32,-13,-29,-32,-30,-33,-31,-34,-14,-15,-23,-16,-24,-17,-25,-18,-19,-26,-20,-27,-21,-28,-22,65,-35,-36,-37,]),'OR':([7,8,16,17,23,24,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,70,71,73,],[-38,-39,-41,-40,33,-13,-29,-32,-30,-33,-31,-34,-14,-15,-23,-16,-24,-17,-25,-18,-19,-26,-20,-27,-21,-28,-22,-35,-36,-37,]),'DOT':([8,25,],[12,12,]),'WHERE':([13,14,26,27,28,],[18,-5,-8,-7,-6,]),'AS':([13,14,26,27,28,],[19,20,-8,-7,-6,]),'GE':([25,],[37,]),'LE':([25,],[38,]),'NE':([25,],[39,]),'BETWEEN':([25,],[40,]),'IN':([25,],[41,]),'NUMBER':([29,30,31,34,35,36,37,38,39,40,64,65,72,],[43,45,47,51,53,55,58,60,62,63,68,70,75,]),'STRING':([36,64,74,],[56,69,76,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'query':([0,3,15,],[1,5,21,]),'select':([0,3,15,],[2,2,2,]),'list':([4,11,18,29,30,31,32,33,],[6,16,22,42,44,46,22,22,]),'table':([10,],[13,]),'lst':([18,],[23,]),'condition':([18,32,33,],[24,48,49,]),'const_list':([63,],[65,]),}
+_lr_goto_items = {'query':([0,3,15,],[1,5,21,]),'select':([0,3,15,],[2,2,2,]),'list':([4,11,18,29,30,31,32,33,],[6,16,22,42,44,46,22,22,]),'table':([10,],[13,]),'lst':([18,],[23,]),'condition':([18,32,33,],[24,48,49,]),'const_list':([64,],[66,]),'string_list':([64,],[67,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -27,41 +27,45 @@ for _k, _v in _lr_goto_items.items():
 del _lr_goto_items
 _lr_productions = [
   ("S' -> query","S'",1,None,None,None),
-  ('query -> select','query',1,'p_query','yacc.py',103),
-  ('query -> LP query RP','query',3,'p_query','yacc.py',104),
-  ('select -> SELECT list FROM table WHERE lst','select',6,'p_select','yacc.py',112),
-  ('select -> SELECT list FROM table','select',4,'p_select','yacc.py',113),
-  ('table -> NAME','table',1,'p_table','yacc.py',131),
-  ('table -> LP query RP','table',3,'p_table','yacc.py',132),
-  ('table -> NAME AS NAME','table',3,'p_table','yacc.py',133),
-  ('table -> table AS NAME','table',3,'p_table','yacc.py',134),
-  ('const_list -> const_list COMMA NUMBER','const_list',3,'p_const_list','yacc.py',153),
-  ('const_list -> NUMBER','const_list',1,'p_const_list','yacc.py',154),
-  ('lst -> condition','lst',1,'p_lst','yacc.py',164),
-  ('lst -> lst AND condition','lst',3,'p_lst','yacc.py',165),
-  ('lst -> lst OR condition','lst',3,'p_lst','yacc.py',166),
-  ('condition -> NAME > NUMBER','condition',3,'p_condition','yacc.py',187),
-  ('condition -> NAME < NUMBER','condition',3,'p_condition','yacc.py',188),
-  ('condition -> NAME = NUMBER','condition',3,'p_condition','yacc.py',189),
-  ('condition -> NAME GE NUMBER','condition',3,'p_condition','yacc.py',190),
-  ('condition -> NAME LE NUMBER','condition',3,'p_condition','yacc.py',191),
-  ('condition -> NAME NE NUMBER','condition',3,'p_condition','yacc.py',192),
-  ('condition -> NAME > NAME','condition',3,'p_condition','yacc.py',193),
-  ('condition -> NAME < NAME','condition',3,'p_condition','yacc.py',194),
-  ('condition -> NAME = NAME','condition',3,'p_condition','yacc.py',195),
-  ('condition -> NAME GE NAME','condition',3,'p_condition','yacc.py',196),
-  ('condition -> NAME LE NAME','condition',3,'p_condition','yacc.py',197),
-  ('condition -> NAME NE NAME','condition',3,'p_condition','yacc.py',198),
-  ('condition -> list > list','condition',3,'p_condition','yacc.py',199),
-  ('condition -> list < list','condition',3,'p_condition','yacc.py',200),
-  ('condition -> list = list','condition',3,'p_condition','yacc.py',201),
-  ('condition -> list > NUMBER','condition',3,'p_condition','yacc.py',202),
-  ('condition -> list < NUMBER','condition',3,'p_condition','yacc.py',203),
-  ('condition -> list = NUMBER','condition',3,'p_condition','yacc.py',204),
-  ('condition -> NAME BETWEEN NUMBER AND NUMBER','condition',5,'p_condition','yacc.py',205),
-  ('condition -> NAME IN LP const_list RP','condition',5,'p_condition','yacc.py',206),
-  ('list -> *','list',1,'p_list','yacc.py',242),
-  ('list -> NAME','list',1,'p_list','yacc.py',243),
-  ('list -> NAME DOT NAME','list',3,'p_list','yacc.py',244),
-  ('list -> list COMMA list','list',3,'p_list','yacc.py',245),
+  ('query -> select','query',1,'p_query','yacc.py',107),
+  ('query -> LP query RP','query',3,'p_query','yacc.py',108),
+  ('select -> SELECT list FROM table WHERE lst','select',6,'p_select','yacc.py',116),
+  ('select -> SELECT list FROM table','select',4,'p_select','yacc.py',117),
+  ('table -> NAME','table',1,'p_table','yacc.py',139),
+  ('table -> LP query RP','table',3,'p_table','yacc.py',140),
+  ('table -> NAME AS NAME','table',3,'p_table','yacc.py',141),
+  ('table -> table AS NAME','table',3,'p_table','yacc.py',142),
+  ('const_list -> const_list COMMA NUMBER','const_list',3,'p_const_list','yacc.py',161),
+  ('const_list -> NUMBER','const_list',1,'p_const_list','yacc.py',162),
+  ('string_list -> string_list COMMA STRING','string_list',3,'p_string_list','yacc.py',172),
+  ('string_list -> STRING','string_list',1,'p_string_list','yacc.py',173),
+  ('lst -> condition','lst',1,'p_lst','yacc.py',183),
+  ('lst -> lst AND condition','lst',3,'p_lst','yacc.py',184),
+  ('lst -> lst OR condition','lst',3,'p_lst','yacc.py',185),
+  ('condition -> NAME > NUMBER','condition',3,'p_condition','yacc.py',203),
+  ('condition -> NAME < NUMBER','condition',3,'p_condition','yacc.py',204),
+  ('condition -> NAME = NUMBER','condition',3,'p_condition','yacc.py',205),
+  ('condition -> NAME = STRING','condition',3,'p_condition','yacc.py',206),
+  ('condition -> NAME GE NUMBER','condition',3,'p_condition','yacc.py',207),
+  ('condition -> NAME LE NUMBER','condition',3,'p_condition','yacc.py',208),
+  ('condition -> NAME NE NUMBER','condition',3,'p_condition','yacc.py',209),
+  ('condition -> NAME > NAME','condition',3,'p_condition','yacc.py',210),
+  ('condition -> NAME < NAME','condition',3,'p_condition','yacc.py',211),
+  ('condition -> NAME = NAME','condition',3,'p_condition','yacc.py',212),
+  ('condition -> NAME GE NAME','condition',3,'p_condition','yacc.py',213),
+  ('condition -> NAME LE NAME','condition',3,'p_condition','yacc.py',214),
+  ('condition -> NAME NE NAME','condition',3,'p_condition','yacc.py',215),
+  ('condition -> list > list','condition',3,'p_condition','yacc.py',216),
+  ('condition -> list < list','condition',3,'p_condition','yacc.py',217),
+  ('condition -> list = list','condition',3,'p_condition','yacc.py',218),
+  ('condition -> list > NUMBER','condition',3,'p_condition','yacc.py',219),
+  ('condition -> list < NUMBER','condition',3,'p_condition','yacc.py',220),
+  ('condition -> list = NUMBER','condition',3,'p_condition','yacc.py',221),
+  ('condition -> NAME BETWEEN NUMBER AND NUMBER','condition',5,'p_condition','yacc.py',222),
+  ('condition -> NAME IN LP const_list RP','condition',5,'p_condition','yacc.py',223),
+  ('condition -> NAME IN LP string_list RP','condition',5,'p_condition','yacc.py',224),
+  ('list -> *','list',1,'p_list','yacc.py',259),
+  ('list -> NAME','list',1,'p_list','yacc.py',260),
+  ('list -> NAME DOT NAME','list',3,'p_list','yacc.py',261),
+  ('list -> list COMMA list','list',3,'p_list','yacc.py',262),
 ]

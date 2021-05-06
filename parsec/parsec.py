@@ -35,6 +35,7 @@ class CType:
         self.name = ""
         self.offset = 0
         self.parser = parser
+        self.allFields = None
 
         if type(node) == c_ast.Typedef:
 
@@ -199,15 +200,17 @@ class CType:
 
     # Process * (or struct.*, etc)
     def findAllFields(self):
-        lst = []
-        name = self.name
-        for f in self.fields:
-            if f.arraySize > 0 and f.dataType != 'char':
-                for i in range(0,f.arraySize):
-                    lst.extend( f._findAllFields( name, f.offset + i * f.dataSize, "[" + str(i) + "]" ) ) # array element
-            else:
-                lst.extend( f._findAllFields( name, f.offset ) )  # field
-        return lst
+        if self.allFields == None:
+            lst = []
+            name = self.name
+            for f in self.fields:
+                if f.arraySize > 0 and f.dataType != 'char':
+                    for i in range(0,f.arraySize):
+                        lst.extend( f._findAllFields( name, f.offset + i * f.dataSize, "[" + str(i) + "]" ) ) # array element
+                else:
+                    lst.extend( f._findAllFields( name, f.offset ) )  # field
+            self.allFields = lst
+        return self.allFields
 
     def match( self, fieldName, columnName):
         if fieldName == columnName:
@@ -215,18 +218,19 @@ class CType:
         else:
             return False
 
-    def findField(self, allFields, column ):
+    def findField(self, column ):
 
         # Main structure name is optional, but we require it for matching
 
         if column[0:len(self.name)] != self.name:
-            columnExpr = self.name + "\." + column
+            columnExpr = self.name + "." + column
         else:
             columnExpr = column
 
-        rex = re.compile(columnExpr)
+        rexText = self.makeRegexp( columnExpr )
+        rex = re.compile(rexText)
         fields = []
-        for f in allFields:
+        for f in self.findAllFields():
             if re.match( rex, f.name ):
                 fields.append( f )
         return fields
@@ -245,12 +249,12 @@ class CType:
 
     def findFields( self, columns ):
 
-        allFields = self.findAllFields()
-
         fields = []
         for c in columns:
-            rex = self.makeRegexp( c )
-            fields.extend( self.findField(allFields,rex) )
+            l = self.findField(c)
+            if len(l) == 0:
+                raise Exception("Unknown column name '{0}'".format(c))
+            fields.extend( self.findField(c) )
 
         return fields
 

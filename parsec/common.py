@@ -1,6 +1,6 @@
-doLog = 1
+doLog = False
 
 def Log(*args):
-    if doLog == 1:
+    if doLog:
         print(*args)
 
