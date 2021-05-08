@@ -3,7 +3,7 @@ typedef enum _enum_data
 	e1 = 1, e2, e3
 } ENUM_DATA;
 
-typedef enum
+enum
 {
 	E1,
 	E2 = 3,
@@ -13,7 +13,7 @@ typedef enum
 	EMAX
 };
 
-typedef enum
+enum
 {
 	ER = 1 << E4,
 	ES = -1,
