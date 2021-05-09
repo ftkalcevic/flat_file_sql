@@ -76,15 +76,25 @@ static void make_file()
 		s.ain1[9] = 43;
 		strcpy(s.str, "Test");
 
+		s.union1_type = 1;
+		strcpy(s.union1.simp1, "simp1");
+		s.union2_type = 1;
+		s.union2.type1 = 1;
 		fwrite(&s, sizeof(s), 1, fptr);
 
 		MY_STRUCT s2;
 		memset(&s2, 0, sizeof(s2));
 		s2.index = 1;
 		fwrite(&s2, sizeof(s2), 1, fptr);
+		s2.union1_type = 2;
+		s2.union1.simp2 = 2;
+		s2.union2_type = 2;
+		strcpy(s2.union2.type2, "type2");
 
 		s.index = 2;
 		fwrite(&s, sizeof(s), 1, fptr);
+		s.union2_type = 3;
+		s.union2.type3 = 3.33;
 
 		s2.index = 3;
 		fwrite(&s2, sizeof(s2), 1, fptr);

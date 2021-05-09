@@ -394,9 +394,6 @@ if __name__ == "__main__":
 
 r''' 
 TODO -
-* run preprocessor over input
-* Bitfields
-* unions 
 * functions - DATEADD, etc (what's a date? unix_time long/long64, ms date - float?  Julian - int?)
 * fix/test endian
 * nameless structs

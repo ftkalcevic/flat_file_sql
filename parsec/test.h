@@ -63,6 +63,15 @@ typedef struct _my_struct
 	{
 		int a, b, c;
 	} why2[2];
+	int union1_type;
+	TEST_UNION union1;
+	int union2_type;
+	union
+	{
+		int type1;
+		char type2[45];
+		double type3;
+	} union2;
 	char ch1;
 	int bf00 : 6;
 	int bf01 : 6;

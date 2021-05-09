@@ -53,7 +53,16 @@ class CType:
                     self.dataSize += t.getDataSize()
 
             elif type(node.type.type) == c_ast.Union:
-                raise Exception("Unions not supported");
+                self.name = node.name
+                self.dataType =  "Union"
+                struct = node.type.type;
+                self.dataSize = 0
+                for decl in struct.decls:
+                    t = CType(parser,decl)
+                    self.fields.append( t )
+                    size = t.getDataSize()
+                    if size > self.dataSize:
+                        self.dataSize = size
 
             elif type(node.type.type) == c_ast.IdentifierType:
                 self.fields.append( CType(parser,node.type.type) )
@@ -157,6 +166,29 @@ class CType:
                 t = CType(self.parser,decl)
                 self.fields.append( t )
                 self.dataSize += t.getDataSize()
+
+        elif type(node.type) == c_ast.Union:
+
+            union = node.type;
+
+            if union.decls == None:
+                if union.name in self.parser.unions:
+                    union = self.parser.unions[union.name]
+                else:
+                    raise Exception("Unknown Union - " + union.name)
+
+            if self.name == "":
+                self.name = union.name
+            self.dataType =  "Union"
+
+            self.dataSize = 0
+            for decl in union.decls:
+                t = CType(self.parser,decl)
+                self.fields.append( t )
+                size = t.getDataSize()
+                if size > t.dataSize:
+                    self.dataSize = size
+
 
         else:
             raise Exception("Unknown typedecl subtype - " + str(type(node.type)) )
