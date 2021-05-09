@@ -2,10 +2,11 @@ import copy
 import sys
 import io
 import re
+import os
 import common
 from common import Log
 
-from pycparser import c_parser, c_ast
+from pycparser import c_parser, c_ast, parse_file
 
 def getTypeSize(t):
     if t in ('char'):
@@ -26,6 +27,8 @@ class FieldInstance:
         self.ctype = ctype
 
 class CType:
+    lastBitField = None
+
     def __init__(self, parser, node):
         self.fields = []
         self.arraySize = 0
@@ -80,8 +83,15 @@ class CType:
         return size
 
     def computeOffsets(self, offset = 0):
-        self.offset = offset
 
+        if self.bitFieldSize > 0:
+            if self.bitFieldSibling == None:
+                self.offset = offset
+            else:
+                self.offset = self.bitFieldSibling.offset
+            return
+
+        self.offset = offset
         if self.dataType == "Struct":
             baseOffset = 0
             for f in self.fields:
@@ -157,35 +167,46 @@ class CType:
         self.name = node.name
 
         if node.bitsize != None:
-            assert node.bitsize == None
             self.bitFieldSize = int(node.bitsize.value)
-
-        if type(node.type) == c_ast.TypeDecl:
-            self.processTypeDecl(node.type )
-
-        elif type(node.type) == c_ast.Struct:
-
-            struct = node.type;
-
-            if struct.decls == None:
-                if struct.name in self.parser.structs:
-                    struct = self.parser.structs[struct.name]
-                else:
-                    raise Exception("Unknown Struct - " + struct.name)
-
-            self.dataSize = 0
-            for decl in struct.decls:
-                self.fields.append( CType(self.parser,decl) )
-                self.dataSize += decl.getDataSize()
-
-        elif type(node.type) == c_ast.ArrayDecl:
-
-            arr = node.type
-            self.arraySize = self.parser.evaluate(arr.dim)
-            self.processTypeDecl( arr.type )
+            self.underlyingBitFieldType = node.bitsize.type
+            self.processTypeDecl(node.type)
+            if CType.lastBitField == None:
+                self.bitFieldOffset = 0
+            else:
+                self.bitFieldOffset = CType.lastBitField.bitFieldOffset + CType.lastBitField.bitFieldSize
+                self.dataSize = 0
+            self.bitFieldSibling = CType.lastBitField
+            CType.lastBitField = self
 
         else:
-            raise Exception("Unknown typedecl subtype - " + str(type(node.type)) )
+            if type(node.type) == c_ast.TypeDecl:
+                self.processTypeDecl(node.type )
+
+            elif type(node.type) == c_ast.Struct:
+
+                struct = node.type;
+
+                if struct.decls == None:
+                    if struct.name in self.parser.structs:
+                        struct = self.parser.structs[struct.name]
+                    else:
+                        raise Exception("Unknown Struct - " + struct.name)
+
+                self.dataSize = 0
+                for decl in struct.decls:
+                    self.fields.append( CType(self.parser,decl) )
+                    self.dataSize += decl.getDataSize()
+
+            elif type(node.type) == c_ast.ArrayDecl:
+
+                arr = node.type
+                self.arraySize = self.parser.evaluate(arr.dim)
+                self.processTypeDecl( arr.type )
+
+            else:
+                raise Exception("Unknown typedecl subtype - " + str(type(node.type)) )
+
+            CType.lastBitField = None
 
     def _findAllFields(self, name, offset, arraySuffix = ""):
         lst = []
@@ -344,12 +365,11 @@ class StructParser:
 
     def Parse(self, filename):
 
-        with io.open(filename) as f:
-            text = f.read()
+        if not os.path.exists(filename):
+            raise Exception("File does not exist '{0}'".format(filename) )
 
         try:
-            parser = c_parser.CParser()
-            node = parser.parse(text, filename)
+            node = parse_file( filename, use_cpp = True )
         except c_parser.ParseError:
             e = sys.exc_info()[1]
             raise Exception("Parse error:" + str(e))
@@ -357,8 +377,8 @@ class StructParser:
         if (not isinstance(node, c_ast.FileAST) or not isinstance(node.ext[-1], c_ast.Decl)):
             raise Exception("Not a valid declaration")
 
-        #if common.doLog:
-        #    node.show()
+        if common.doLog:
+            node.show()
         self.extract_types( node )    
 
     def MakeType(self, typename):
@@ -367,8 +387,8 @@ class StructParser:
 
         t = CType(self, node)
         t.computeOffsets()
-        #if common.doLog:
-        #    t.print()
+        if common.doLog:
+            t.print()
         return t
 
 

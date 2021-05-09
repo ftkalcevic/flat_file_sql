@@ -1,4 +1,4 @@
-doLog = True
+doLog = False
 
 def Log(*args):
     if doLog:

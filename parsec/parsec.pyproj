@@ -12,7 +12,7 @@
     <Name>parsec</Name>
     <RootNamespace>parsec</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>select index from MY_STRUCT</CommandLineArguments>
+    <CommandLineArguments>--debug</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

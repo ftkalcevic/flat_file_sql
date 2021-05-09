@@ -1,3 +1,5 @@
+#define BITFIELDS
+
 typedef enum _enum_data
 {
 	e1 = 1, e2, e3
@@ -62,6 +64,8 @@ typedef struct _my_struct
 		int a, b, c;
 	} why2[2];
 	char ch1;
+	int bf00 : 6;
+	int bf01 : 6;
 	int  in1;
 	long l1;
 	short s1;
@@ -69,7 +73,13 @@ typedef struct _my_struct
 	float f1;
 	double d1;
 	long long ll1;
-
+#ifdef BITFIELDS
+	unsigned int bf1 : 1;
+	int bf2 : 2;
+	int bf3 : 1;
+	unsigned int bf4 : 4;
+	int bf5 : 4;
+#endif
 	int ain1[10];
 	char str[10 + 1];
 

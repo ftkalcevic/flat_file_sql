@@ -3,7 +3,9 @@
 #pragma pack(1)
 #include "test.h"
 
-#define PRINT(struct)		printf("sizeof(" #struct ")=%d\n", sizeof(struct))
+#define PRINT(struct)				printf("sizeof(" #struct ")=%d\n", sizeof(struct))
+#define PRINT_OFFSET(struct, var)	printf("offsetof(" #struct "." #var "=%d\n", (int)&(((struct *)(0))->var) )
+
 
 static const char* file = "..\\parsec\\test.data";
 
@@ -52,6 +54,16 @@ static void make_file()
 		s.f1 = 31.31313131313131F;
 		s.d1 = 32.32323232323232323232;
 		s.ll1 = 100000000000033LL;
+		printf("ll1 = %lld %llx\n", s.ll1, s.ll1);
+#ifdef BITFIELDS
+		s.bf00 = 20;
+		s.bf01 = -20;
+		s.bf1 = 0;
+		s.bf2 = 2;
+		s.bf3 = 1;
+		s.bf4 = 0xF;
+		s.bf5 = 0xF;
+#endif
 		s.ain1[0] = 34;
 		s.ain1[1] = 35;
 		s.ain1[2] = 36;
@@ -101,6 +113,10 @@ void main()
 	PRINT(MY_SIMPLE);
 	PRINT(ENUM_DATA);
 	//PRINT(x.bf);
+
+	PRINT_OFFSET(MY_STRUCT, ll1);
+	//PRINT_OFFSET(MY_STRUCT, bf1);
+	PRINT_OFFSET(MY_STRUCT, ain1);
 
 	make_file();
 }

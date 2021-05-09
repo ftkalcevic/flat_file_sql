@@ -8,6 +8,7 @@ from pathlib import Path
 from parsec import StructParser
 #from sql import Sql
 from yacc import Sql
+import common
 from common import Log
 
 tables = { 
@@ -185,7 +186,18 @@ class Where:
 
 def extractData( buf, t, offset):
 
-    if t.dataType in ("char" ) and t.arraySize > 0:
+    if t.bitFieldSize > 0:
+        assert( t.underlyingBitFieldType == 'int' )
+
+        n = int.from_bytes(buf[offset:offset+4], byteorder = order, signed = False )    # extract an unsigned int
+        n = (n >> t.bitFieldOffset) & ((1 << t.bitFieldSize)-1)
+        if not "unsigned" in t.dataType:
+            # signed
+            if n & (1 << (t.bitFieldSize-1)):
+                n = n - (1 << (t.bitFieldSize))
+        return n
+
+    elif t.dataType in ("char" ) and t.arraySize > 0:
         s = ""
         for i in range(offset,offset+t.arraySize):
             if buf[i] == 0:
@@ -304,17 +316,26 @@ def findQueryColumns(node):
 if __name__ == "__main__":
 
     try:
-        sqlQuery = ' '.join(sys.argv[1:])
-        Log(sqlQuery)
-        sql = Sql(sqlQuery)
-
-
         #sql = Sql("Select index, mi, MY_STRUCT.why.b, why.c, * from MY_STRUCT where index = 4 or index = 7")
         #sql = Sql("SELECT index, mi, why.*, msa, str from MY_STRUCT where windex >= 2 and mi in (1,2,3) or msa[1].simp2 between 1 and 5 and str = 'test'")
         #sql = Sql("Select index, mi, why.* from MY_STRUCT where index in (1,3,5)")
         #sql = Sql("Select index, mi, why.*, str from MY_STRUCT where str in ('a', 'test')")
         #sql = Sql("Select index, mi, why.*, str from MY_STRUCT where index between 2 and 3")
-        sql = Sql("Select index, mi, why2[*].*, str from MY_STRUCT where str like 't.*'")
+        #sqlQuery = "Select *, index, mi, why2[*].*, str from MY_STRUCT where str like 't.*'"
+        sqlQuery = "Select * from MY_STRUCT"
+
+        index = 1
+        while index < len(sys.argv):
+            if sys.argv[index] == "--debug":
+                common.doLog = True
+            else:
+                sqlQuery = ' '.join(sys.argv[index:])
+                break
+            index += 1
+
+        Log(sqlQuery)
+        if len(sqlQuery) > 0:
+            sql = Sql(sqlQuery)
 
         node = sql.findNode( "[TABLE]" )
 
@@ -372,17 +393,11 @@ if __name__ == "__main__":
         print("Error! {0}".format(q) )
 
 r''' 
-
-* - gets every column, [colname, offset], 
-        arrays (non-char) will be field[0], field[1], field[2], etc
-                structs will be field[0].s1, field[0].s2, etc
-struct_name.*
-array_member.*
-array[number].*
-array[*]
-array[]
-    
-each "column" will be a class instance, keeping a pointer to the internal structure.
-when it comes time to output, we'll take as an input, the byte array of the structure, then we can iterate from where we are?
-Or do we expand the query into a list of individual fields, with type + offset.  Arrays will be expanded.
+TODO -
+* run preprocessor over input
+* Bitfields
+* unions 
+* functions - DATEADD, etc (what's a date? unix_time long/long64, ms date - float?  Julian - int?)
+* fix/test endian
+* nameless structs
 '''
